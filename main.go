@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/awnumar/memguard"
 	"github.com/gavincarr/go-slip39"
 	"github.com/skip2/go-qrcode"
 	"github.com/tyler-smith/go-bip32"
@@ -122,6 +123,26 @@ func main() {
 	// Output: bb54aac4b89dc868ba37d9cc21b2cece
 
 	// xrp()
+
+	protectPasswordMemory("SecurePasswordINMemory")
+}
+
+func protectPasswordMemory(pass string) {
+	// Ensure memguard exits cleanly on interruption
+	memguard.CatchInterrupt()
+
+	// Purge leaked secrets on exit
+	defer memguard.Purge()
+
+	// Securely allocate a password in memory
+	password := memguard.NewBufferFromBytes([]byte(pass))
+
+	// Use the password securely (example: print length)
+	fmt.Printf("Password is %d characters long\n", password.Size())
+	fmt.Printf("Password is %s \n", string(password.Data()))
+
+	// Zero out memory and destroy the buffer when done
+	password.Destroy()
 }
 
 // func xrp() {

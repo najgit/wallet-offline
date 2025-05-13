@@ -1,0 +1,25 @@
+const bip39 = require('bip39');
+const bitcoin = require('bitcoinjs-lib');
+const bip32 = require('bip32').default || require('bip32'); // ✅ robust import
+
+// 1. Generate mnemonic
+const mnemonic = bip39.generateMnemonic();
+console.log('Mnemonic:', mnemonic);
+
+// 2. Convert mnemonic to seed
+const seed = bip39.mnemonicToSeedSync(mnemonic);
+
+// 3. Derive root and key using BIP44 path for BTC
+const root = bip32.fromSeed(seed, bitcoin.networks.bitcoin);
+const child = root.derivePath("m/44'/0'/0'/0/0");
+
+// 4. Generate Bitcoin address
+const { address } = bitcoin.payments.p2pkh({
+  pubkey: child.publicKey,
+  network: bitcoin.networks.bitcoin,
+});
+
+console.log('\n[BTC Wallet]');
+console.log('Address:     ', address);
+console.log('WIF (Priv):  ', child.toWIF());
+

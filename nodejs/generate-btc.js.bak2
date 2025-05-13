@@ -1,0 +1,25 @@
+const bitcore = require('bitcore-lib');
+const bitcoin = require("bitcoinjs-lib");
+
+function generateLegacyAddress(networkType) {
+    // Generate a random buffer
+    const randBuffer = bitcore.crypto.Random.getRandomBuffer(32);
+    const randNumber = bitcore.crypto.BN.fromBuffer(randBuffer);
+    // Generate a private key from the random number
+    const privateKey = new bitcore.PrivateKey(randNumber);
+    // Determine the network
+    const network = networkType === 'testnet' ? 'testnet' : 'mainnet';
+    // Generate the corresponding address
+    const address = privateKey.toAddress(network);
+    return {
+        privateKey: privateKey.toString(),
+        address: address.toString()
+    };
+}
+module.exports = {
+    generateLegacyAddress
+};
+const network = bitcoin.networks.bitcoin;
+btcaddr = generateLegacyAddress(network);
+console.log("address: ", btcaddr.address);
+console.log("private: ", btcaddr.privateKey);

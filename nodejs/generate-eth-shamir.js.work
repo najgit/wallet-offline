@@ -1,0 +1,53 @@
+const { Wallet } = require('ethers');
+const secrets = require('secrets.js-grempe');
+const bip39 = require('bip39');
+
+// Step 1: Generate a random private key (32 bytes)
+const privateKey = Wallet.createRandom().privateKey;
+console.log("Original Private Key:", privateKey);
+
+// Step 2: Convert the private key into a string and split it using Shamir's Secret Sharing
+const shares = secrets.share(privateKey.slice(2), 5, 3); // 5 shares, requiring 3 to reconstruct
+console.log("\nShamir Secret Shares (Hex):");
+shares.forEach((share, index) => {
+  console.log(`Share ${index + 1}:`, share);
+});
+
+// Step 3: Convert each Shamir share into a BIP39 mnemonic phrase
+const mnemonics = shares.map(share => {
+  // Ensure the share is a valid size for entropy (128, 160, 192, 224, 256 bits)
+  let shareBuffer = Buffer.from(share, 'hex');
+  
+  // Ensure share length matches a valid BIP39 entropy size (128, 160, 192, 224, 256 bits)
+  const validEntropySizes = [16, 20, 24, 28, 32]; // valid BIP39 entropy lengths in bytes (128, 160, 192, 224, 256 bits)
+  
+  // Find the closest valid size (pad if smaller, trim if larger)
+  let targetLength = validEntropySizes.find(size => size >= shareBuffer.length) || validEntropySizes[validEntropySizes.length - 1];
+  
+  // Padding to ensure it has a valid length for entropy
+  if (shareBuffer.length < targetLength) {
+    shareBuffer = Buffer.concat([shareBuffer, Buffer.alloc(targetLength - shareBuffer.length)]);
+  } else if (shareBuffer.length > targetLength) {
+    shareBuffer = shareBuffer.slice(0, targetLength); // trim if larger than the target
+  }
+
+  // Convert the share to a mnemonic
+  return bip39.entropyToMnemonic(shareBuffer);
+});
+
+console.log("\nShamir Secret Shares as Mnemonics:");
+mnemonics.forEach((mnemonic, index) => {
+  console.log(`Mnemonic Share ${index + 1}:`, mnemonic);
+});
+
+// Step 4: Reconstruct the private key by combining a subset of shares (e.g., 3 shares)
+const reconstructedPrivateKey = secrets.combine([shares[0], shares[1], shares[2]]); // Using 3 shares to reconstruct
+console.log("\nReconstructed Private Key:", reconstructedPrivateKey);
+
+// Step 5: Create the Ethereum wallet using the reconstructed private key
+const wallet = new Wallet(`0x${reconstructedPrivateKey}`);
+console.log("\nEthereum Wallet Details:");
+console.log("Address:", wallet.address);
+console.log("Public Key:", wallet.publicKey);
+console.log("Private Key (Hex):", wallet.privateKey);
+

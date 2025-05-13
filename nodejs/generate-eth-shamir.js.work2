@@ -1,0 +1,27 @@
+const bip39 = require('bip39');
+const secrets = require('secrets.js-grempe');
+
+// Configuration
+const threshold = 3; // Minimum shares required to reconstruct
+const totalShares = 5; // Total shares to generate
+
+// Generate a 256-bit entropy for a 33-word mnemonic (256 bits = 32 bytes)
+const entropy = bip39.mnemonicToEntropy(bip39.generateMnemonic(256));  // 33 words
+
+// Generate BIP-39 mnemonic from entropy
+const mnemonic = bip39.entropyToMnemonic(entropy);
+console.log("🔐 Generated Mnemonic (33 words):");
+console.log(mnemonic);
+
+// Split the entropy into shares (use the entropy as a hex string)
+const shares = secrets.share(entropy.toString('hex'), totalShares, threshold);
+console.log("\n📄 Shamir Shares (each 32 characters):");
+shares.forEach((share, index) => {
+  console.log(`Share ${index + 1}: ${share}`);
+});
+
+// Simulate the recovery process using the shares (using 2 out of 3 shares)
+const recoveredSecret = secrets.combine(shares.slice(0, threshold));
+console.log("\n♻️ Recovered Secret from 2 shares:");
+console.log(recoveredSecret);
+

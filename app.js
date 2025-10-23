@@ -10,7 +10,7 @@ async function loadWasm() {
 
 async function displaySharesWithQR(sharesGroups, outputEl) {
 //   const outputEl = document.getElementById('genResult');
-  outputEl.innerHTML = ''; // clear previous
+//   outputEl.innerHTML = ''; // clear previous
 
   for (let groupIdx = 0; groupIdx < sharesGroups.length; groupIdx++) {
     const group = sharesGroups[groupIdx];
@@ -82,7 +82,9 @@ function setupEventListeners() {
         const obj = typeof result === 'string' ? JSON.parse(result) : result;
         if (obj.shares) {
             const sharesGroups = JSON.parse(obj.shares);
-            await displaySharesWithQR(sharesGroups, document.getElementById('genResult'));
+            outputDisplay =document.getElementById('genResult');
+            outputDisplay.innerHTML = '';
+            await displaySharesWithQR(sharesGroups, outputDisplay);
         }
         // Also display mnemonic and masterKeyHex normally
         const outputEl = document.getElementById('genResult');
@@ -132,38 +134,38 @@ document.getElementById('recoverBtn').addEventListener('click', () => {
       if (obj.newShares) {
         const newSharesGroups = JSON.parse(obj.newShares); 
 
-        let formattedShares = '';
+        // let formattedShares = '';
 
-        newSharesGroups.forEach((group, groupIdx) => {
-          formattedShares += `<div><strong>New Group ${groupIdx + 1}:</strong></div>`;
-          group.forEach((share, shareIdx) => {
-            formattedShares += `<div style="margin-bottom: 1em;">
-              <strong>Share ${shareIdx + 1}:</strong><br/>`;
+        // newSharesGroups.forEach((group, groupIdx) => {
+        //   formattedShares += `<div><strong>New Group ${groupIdx + 1}:</strong></div>`;
+        //   group.forEach((share, shareIdx) => {
+        //     formattedShares += `<div style="margin-bottom: 1em;">
+        //       <strong>Share ${shareIdx + 1}:</strong><br/>`;
 
-            // Add QR code container
-            const qrId = `newShareQR-${groupIdx}-${shareIdx}`;
-            formattedShares += `<canvas id="${qrId}" style="margin-bottom: 0.5em;"></canvas><br/>`;
+        //     // Add QR code container
+        //     const qrId = `newShareQR-${groupIdx}-${shareIdx}`;
+        //     formattedShares += `<canvas id="${qrId}" style="margin-bottom: 0.5em;"></canvas><br/>`;
 
-            // Share words in 3 columns
-            const words = share.split(' ');
-            formattedShares += '<table style="border-collapse: collapse;">';
-            for (let i = 0; i < words.length; i += 3) {
-              formattedShares += '<tr>';
-              for (let j = 0; j < 3; j++) {
-                const word = words[i + j];
-                if (word) {
-                  formattedShares += `<td style="border: 1px solid #ccc; padding: 4px 8px; white-space: nowrap;">${word}</td>`;
-                } else {
-                  formattedShares += '<td></td>';
-                }
-              }
-              formattedShares += '</tr>';
-            }
-            formattedShares += '</table></div>';
-          });
-        });
+        //     // Share words in 3 columns
+        //     const words = share.split(' ');
+        //     formattedShares += '<table style="border-collapse: collapse;">';
+        //     for (let i = 0; i < words.length; i += 3) {
+        //       formattedShares += '<tr>';
+        //       for (let j = 0; j < 3; j++) {
+        //         const word = words[i + j];
+        //         if (word) {
+        //           formattedShares += `<td style="border: 1px solid #ccc; padding: 4px 8px; white-space: nowrap;">${word}</td>`;
+        //         } else {
+        //           formattedShares += '<td></td>';
+        //         }
+        //       }
+        //       formattedShares += '</tr>';
+        //     }
+        //     formattedShares += '</table></div>';
+        //   });
+        // });
 
-        outputEl.innerHTML += `<div><strong>New Shares:</strong></div>${formattedShares}`;
+        // outputEl.innerHTML += `<div><strong>New Shares:</strong></div>${formattedShares}`;
 
         displaySharesWithQR(newSharesGroups, outputEl);
     

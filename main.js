@@ -16,3 +16,13 @@ document.getElementById("recBtn").onclick = async () => {
   const res = await recoverShares(pass, shares);
   document.getElementById("recOut").textContent = JSON.stringify(res, null, 2);
 };
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('./service-worker.js')
+      .then(() => console.log('✅ Service Worker Registered (Offline Ready)'))
+      .catch(err => console.error('Service Worker Error:', err));
+  });
+}
+

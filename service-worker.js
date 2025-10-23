@@ -1,45 +1,46 @@
-const CACHE_NAME = 'slip39-pwa-cache-v1';
-const FILES_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/wasm_exec.js',
-  '/main.wasm',
+const CACHE_NAME = "wallet-pwa-v1";
+const OFFLINE_ASSETS = [
+  "./",
+  "./index.html",
+  "./main.js",
+  "./main.wasm",
+  "./wasm_exec.js",
+  "./manifest.json",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png"
 ];
 
-// Install service worker and cache files
-self.addEventListener('install', evt => {
-  evt.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log('[ServiceWorker] Pre-caching offline page');
-      return cache.addAll(FILES_TO_CACHE);
-    })
+// Install: cache everything
+self.addEventListener("install", event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(OFFLINE_ASSETS))
   );
-  self.skipWaiting();
+  self.skipWaiting(); // Activate immediately
 });
 
-// Activate service worker and clean old caches
-self.addEventListener('activate', evt => {
-  evt.waitUntil(
-    caches.keys().then(keyList => {
-      return Promise.all(
-        keyList.map(key => {
-          if (key !== CACHE_NAME) {
-            console.log('[ServiceWorker] Removing old cache', key);
-            return caches.delete(key);
-          }
-        })
-      );
-    })
+// Activate: cleanup old caches
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.map(k => k !== CACHE_NAME && caches.delete(k)))
+    )
   );
-  self.clients.claim();
+  self.clients.claim(); // Control open pages immediately
 });
 
-// Fetch handler - serve from cache, fallback to network
-self.addEventListener('fetch', evt => {
-  evt.respondWith(
-    caches.match(evt.request).then(response => {
-      return response || fetch(evt.request);
-    })
+// Fetch: always serve from cache (offline-first)
+self.addEventListener("fetch", event => {
+  event.respondWith(
+    caches.match(event.request).then(response =>
+      response ||
+      fetch(event.request).then(fetchRes => {
+        // Optionally update cache in background
+        const clone = fetchRes.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return fetchRes;
+      }).catch(() =>
+        caches.match("./index.html") // fallback
+      )
+    )
   );
 });

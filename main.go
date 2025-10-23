@@ -57,7 +57,7 @@ func jsGenerateShares(this js.Value, args []js.Value) any {
 	passphrase := strings.TrimSpace(args[0].String())
 
 	var pass []byte
-	if passphrase == "" {
+	if passphrase != "" {
 		pass = []byte(passphrase)
 	}
 
@@ -91,7 +91,7 @@ func jsRecoverShares(this js.Value, args []js.Value) any {
 	sharesStr := args[1].String()
 
 	var pass []byte
-	if passphrase == "" {
+	if passphrase != "" {
 		pass = []byte(passphrase)
 	}
 

@@ -1,12 +1,16 @@
 const go = new Go();
 
 async function loadWasm() {
-  const result = await WebAssembly.instantiateStreaming(fetch('main.wasm'), go.importObject);
+  const response = await fetch('main.wasm');
+  const bytes = await response.arrayBuffer();
+  const result = await WebAssembly.instantiate(bytes, go.importObject);
   go.run(result.instance);
 
-  // Now WASM is ready, set up event listeners
+    // Now WASM is ready, set up event listeners
   setupEventListeners();
+  console.log("WASM loaded");
 }
+
 
 async function displaySharesWithQR(sharesGroups, outputEl) {
 //   const outputEl = document.getElementById('genResult');
@@ -76,7 +80,7 @@ function setupEventListeners() {
     const passphrase = document.getElementById('passphrase').value || '';
     if (window.generateShares) {
         const result = window.generateShares(passphrase);
-        console.log('generateShares result:', result);
+        // console.log('generateShares result:', result);
 
         try {
         const obj = typeof result === 'string' ? JSON.parse(result) : result;
@@ -117,7 +121,7 @@ document.getElementById('recoverBtn').addEventListener('click', () => {
     const sharesGroups = [shares];
     const result = window.recoverShares(passphrase, JSON.stringify(sharesGroups));
 
-    console.log('recoverShares result:', result);
+    // console.log('recoverShares result:', result);
 
     const outputEl = document.getElementById('recoverResult');
     try {
@@ -238,7 +242,7 @@ async function tick() {
           stopQrScan();
 
           const decodedStr = result.text;
-          console.log('Decoded string:', decodedStr);
+        //   console.log('Decoded string:', decodedStr);
 
           if (!document.getElementById('share1').value) {
             document.getElementById('share1').value = decodedStr;

@@ -16,8 +16,23 @@
 <button id="genBtn">Generate Shares</button>
 <pre id="genResult"></pre>
 
-<textarea id="shares" placeholder="Paste shares JSON here"></textarea>
+
+<div>
+  <label>Share 1:</label><br />
+  <textarea id="share1" rows="2" cols="60"></textarea><br />
+  
+  <label>Share 2:</label><br />
+  <textarea id="share2" rows="2" cols="60"></textarea><br />
+  
+  <label>Share 3:</label><br />
+  <textarea id="share3" rows="2" cols="60"></textarea><br />
+</div>
+
 <button id="recoverBtn">Recover Secret</button>
+<button id="scanQrBtn">Scan QR</button>
+<br/>
+<video id="video" style="display:none;" width="300" height="200" autoplay></video>
+ 
 <pre id="recoverResult"></pre>
 
 </body>

@@ -8,8 +8,8 @@ async function loadWasm() {
   setupEventListeners();
 }
 
-async function displaySharesWithQR(sharesGroups) {
-  const outputEl = document.getElementById('genResult');
+async function displaySharesWithQR(sharesGroups, outputEl) {
+//   const outputEl = document.getElementById('genResult');
   outputEl.innerHTML = ''; // clear previous
 
   for (let groupIdx = 0; groupIdx < sharesGroups.length; groupIdx++) {
@@ -82,7 +82,7 @@ function setupEventListeners() {
         const obj = typeof result === 'string' ? JSON.parse(result) : result;
         if (obj.shares) {
             const sharesGroups = JSON.parse(obj.shares);
-            await displaySharesWithQR(sharesGroups);
+            await displaySharesWithQR(sharesGroups, document.getElementById('genResult'));
         }
         // Also display mnemonic and masterKeyHex normally
         const outputEl = document.getElementById('genResult');
@@ -130,7 +130,8 @@ document.getElementById('recoverBtn').addEventListener('click', () => {
 
       // Display regenerated shares like generateShares
       if (obj.newShares) {
-        const newSharesGroups = JSON.parse(obj.newShares);
+        const newSharesGroups = JSON.parse(obj.newShares); 
+
         let formattedShares = '';
 
         newSharesGroups.forEach((group, groupIdx) => {
@@ -164,18 +165,22 @@ document.getElementById('recoverBtn').addEventListener('click', () => {
 
         outputEl.innerHTML += `<div><strong>New Shares:</strong></div>${formattedShares}`;
 
+        displaySharesWithQR(newSharesGroups, outputEl);
+    
+
         // After inserting HTML, generate QR codes for each new share using JS QR lib
-        newSharesGroups.forEach((group, groupIdx) => {
-          group.forEach((share, shareIdx) => {
-            const qrId = `newShareQR-${groupIdx}-${shareIdx}`;
-            const canvas = document.getElementById(qrId);
-            if (canvas) {
-              QRCode.toCanvas(canvas, share, { errorCorrectionLevel: 'M', margin: 1 }, function (error) {
-                if (error) console.error(error);
-              });
-            }
-          });
-        });
+        // newSharesGroups.forEach((group, groupIdx) => {
+        //   group.forEach((share, shareIdx) => {
+        //     const qrId = `newShareQR-${groupIdx}-${shareIdx}`;
+        //     const canvas = document.getElementById(qrId);
+        //     if (canvas) {
+        //       QRCode.toCanvas(canvas, share, { errorCorrectionLevel: 'M', margin: 1 }, function (error) {
+        //         if (error) console.error(error);
+        //       });
+        //     }
+        //   });
+        // });
+
       }
     } catch (e) {
       outputEl.textContent = String(result);

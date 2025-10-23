@@ -56,6 +56,11 @@ func jsGenerateQRCode(this js.Value, args []js.Value) any {
 func jsGenerateShares(this js.Value, args []js.Value) any {
 	passphrase := strings.TrimSpace(args[0].String())
 
+	var pass []byte
+	if passphrase == "" {
+		pass = []byte(passphrase)
+	}
+
 	// Generate BIP39 seed -> BIP32 master key
 	entropy, _ := bip39.NewEntropy(256)
 	mnemonic, _ := bip39.NewMnemonic(entropy)
@@ -67,7 +72,7 @@ func jsGenerateShares(this js.Value, args []js.Value) any {
 		1,
 		[]slip39.MemberGroupParameters{{MemberThreshold: 3, MemberCount: 5}},
 		masterSecret,
-		[]byte(passphrase),
+		pass,
 	)
 	if err != nil {
 		return map[string]any{"error": err.Error()}
@@ -85,13 +90,18 @@ func jsRecoverShares(this js.Value, args []js.Value) any {
 	passphrase := strings.TrimSpace(args[0].String())
 	sharesStr := args[1].String()
 
+	var pass []byte
+	if passphrase == "" {
+		pass = []byte(passphrase)
+	}
+
 	var groups [][]string
 	if err := json.Unmarshal([]byte(sharesStr), &groups); err != nil {
 		return map[string]any{"error": err.Error()}
 	}
 
 	subset := groups[0] // or first 3 shares passed
-	recovered, err := slip39.CombineMnemonicsWithPassphrase(subset, []byte(passphrase))
+	recovered, err := slip39.CombineMnemonicsWithPassphrase(subset, pass)
 	if err != nil {
 		return map[string]any{"error": err.Error()}
 	}
@@ -101,7 +111,7 @@ func jsRecoverShares(this js.Value, args []js.Value) any {
 		1,
 		[]slip39.MemberGroupParameters{{MemberThreshold: 3, MemberCount: 5}},
 		recovered,
-		[]byte(""), // empty passphrase
+		nil, // empty passphrase
 	)
 	if err != nil {
 		return map[string]any{"error": err.Error()}

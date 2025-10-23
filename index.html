@@ -11,14 +11,17 @@
   <script src="app.js"></script>
 </head>
 <body>
-  <h1>VERSION 1.0.1</h1>
+  <h1>VERSION 1.0.2</h1>
   <h1>SLIP39 PWA</h1>
-<input id="passphrase" placeholder="Enter passphrase" />
+<input id="passphrase" placeholder="Enter passphrase" style="width: 100%; box-sizing: border-box;" />
 <button id="genBtn">Generate Shares</button>
 <pre id="genResult"></pre>
 
 
 <div>
+<br/>
+<button id="scanQrBtn">Scan QR input</button>
+<br/>
   <label>Share 1:</label><br />
   <textarea id="share1" rows="2" cols="60"></textarea><br />
   
@@ -28,13 +31,19 @@
   <label>Share 3:</label><br />
   <textarea id="share3" rows="2" cols="60"></textarea><br />
 </div>
-
-<button id="recoverBtn">Recover Secret</button>
-<button id="scanQrBtn">Scan QR</button>
 <br/>
 <video id="video" style="display:none;" width="300" height="200" autoplay></video>
+
+<button id="recoverBtn">Recover encrypted shares with passphrase</button>
+<br/>
+<br/>
+
+<input id="passphrase" placeholder="Enter new passphrase" style="width: 100%; box-sizing: border-box;" />
+<button id="secureShares">Secure existing shares with new passphrase</button>
  
 <pre id="recoverResult"></pre>
 
+<h1>new encrypted shares</h1>
+<pre id="secureResult"></pre>
 </body>
 </html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval'; object-src 'self'">
+
+  <title>SLIP39 PWA</title>
+  <link rel="manifest" href="manifest.json" />
+  <script src="wasm_exec.js"></script>
+  <script src="app.js"></script>
+</head>
+<body>
+  <h1>SLIP39 PWA</h1>
+<input id="passphrase" placeholder="Enter passphrase" />
+<button id="genBtn">Generate Shares</button>
+<pre id="genResult"></pre>
+
+<textarea id="shares" placeholder="Paste shares JSON here"></textarea>
+<button id="recoverBtn">Recover Secret</button>
+<pre id="recoverResult"></pre>
+
+</body>
+</html>

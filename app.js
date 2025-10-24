@@ -164,7 +164,7 @@ document.getElementById('recoverBtn').addEventListener('click', async () => {
     const sharesGroups = [shares];
     const result = window.recoverShares(passphrase, JSON.stringify(sharesGroups));
     const outputEl = document.getElementById('recoverResult');
-    const secureEl = document.getElementById('secureresult');
+    const secureEl = document.getElementById('secureResult');
 
     const obj = typeof result === 'string' ? JSON.parse(result) : result;
 
@@ -178,8 +178,8 @@ document.getElementById('recoverBtn').addEventListener('click', async () => {
 
     // Display regenerated shares
     if (obj.newShares) {
-      const newSharesGroups = JSON.parse(obj.newShares);
-      await displaySharesWithQR(newSharesGroups, outputEl);
+        const newSharesGroups = JSON.parse(obj.newShares);
+        await displaySharesWithQR(newSharesGroups, outputEl);
 
         // Re-encrypt shares if re_passphrase is provided
         if (re_passphrase !== '' && window.reEncryptShares) {
@@ -194,10 +194,9 @@ document.getElementById('recoverBtn').addEventListener('click', async () => {
                 }
                 
                 // Display re-encrypted shares just like recovered shares
-                const secureEl = document.getElementById('secureresult');
                 secureEl.innerHTML = ''; // Clear previous
 
-                 const newSharesGroups = JSON.parse(reEncryptedGroups.shares);
+                const newSharesGroups = JSON.parse(reEncryptedGroups.shares);
                 await displaySharesWithQR(newSharesGroups, secureEl);
 
                 // displaySharesWithQR(reEncryptedGroups, secureEl);
@@ -207,7 +206,6 @@ document.getElementById('recoverBtn').addEventListener('click', async () => {
                 secureEl.innerHTML = `Error re-encrypting shares: ${e.message}`;
             }
         }
-
 
     }
   } catch (e) {

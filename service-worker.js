@@ -1,13 +1,13 @@
 const CACHE_NAME = "wallet-pwa-v4";
 const OFFLINE_ASSETS = [
-  "./",
-  "./index.html",
-  "./app.js",
-  "./wasm_exec.js",
-  "./main.wasm",
-  "./manifest.json",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png"
+  "/",
+  "/index.html",
+  "/app.js",
+  "/wasm_exec.js",
+  "/main.wasm",
+  "/manifest.json",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png"
 ];
 
 self.addEventListener("install", event => {

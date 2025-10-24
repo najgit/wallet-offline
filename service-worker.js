@@ -29,20 +29,24 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      if (response) {
-        console.log("[SW] Loaded from cache:", event.request.url);
-        return response;
-      }
-      return fetch(event.request)
-        .then(networkResponse => {
-          if (!networkResponse || networkResponse.status !== 200) return networkResponse;
-          const cloned = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, cloned));
-          return networkResponse;
-        })
-        .catch(() => caches.match("./index.html"));
-    })
-  );
+  const reqUrl = new URL(event.request.url);
+
+  // Only cache same-origin HTTP/HTTPS requests
+  if (reqUrl.protocol.startsWith("http")) {
+    event.respondWith(
+      caches.match(event.request).then(response => {
+        return response || fetch(event.request).then(fetchRes => {
+          const clone = fetchRes.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          return fetchRes;
+        });
+      }).catch(() => {
+        // Optional: fallback if offline
+      })
+    );
+  } else {
+    // For non-http/https requests, just let them go to network
+    return;
+  }
 });
+

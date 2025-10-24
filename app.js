@@ -120,16 +120,16 @@ function setupEventListeners() {
             `<div><strong>Master Key (hex):</strong> ${obj.masterKeyHex}</div>`
         );
 
-         // --- New: populate share1,2,3 and trigger recover ---
-        if (sharesGroups[0] && sharesGroups[0].length >= 3) {
-          document.getElementById('share1').value = sharesGroups[0][0];
-          document.getElementById('share2').value = sharesGroups[0][1];
-          document.getElementById('share3').value = sharesGroups[0][2];
+        //  // --- New: populate share1,2,3 and trigger recover ---
+        // if (sharesGroups[0] && sharesGroups[0].length >= 3) {
+        //   document.getElementById('share1').value = sharesGroups[0][0];
+        //   document.getElementById('share2').value = sharesGroups[0][1];
+        //   document.getElementById('share3').value = sharesGroups[0][2];
 
-          // Trigger recover button click programmatically
-          document.getElementById('recoverBtn').click();
-        }
-        
+        //   // Trigger recover button click programmatically
+        //   document.getElementById('recoverBtn').click();
+        // }
+
         } catch (e) {
         document.getElementById('genResult').textContent = String(result);
         }

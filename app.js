@@ -116,6 +116,7 @@ function setupEventListeners() {
         
          // --- New: populate share1,2,3 and trigger recover ---
         if (sharesGroups[0] && sharesGroups[0].length >= 3) {
+            console.log("add trigger recover botton....")
           document.getElementById('share1').value = sharesGroups[0][0];
           document.getElementById('share2').value = sharesGroups[0][1];
           document.getElementById('share3').value = sharesGroups[0][2];

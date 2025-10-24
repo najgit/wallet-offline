@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"image/jpeg"
 	"log"
 	"strings"
@@ -19,6 +20,8 @@ import (
 	"github.com/tyler-smith/go-bip32"
 	"github.com/tyler-smith/go-bip39"
 )
+
+type ShareGroup [][]string
 
 func main() {
 	c := make(chan struct{})
@@ -125,6 +128,35 @@ func jsRecoverShares(this js.Value, args []js.Value) any {
 		// optionally add mnemonic or masterKeyHex if you want
 	}
 }
+
+// ReEncryptShares takes new passphrase and recovered shares JSON, returns re-encrypted shares JSON
+func ReEncryptShares(newPassphrase string, recoveredSharesJSON string) (string, error) {
+	if newPassphrase == "" {
+		return "", errors.New("new passphrase is empty")
+	}
+
+	var sharesGroups ShareGroup
+	err := json.Unmarshal([]byte(recoveredSharesJSON), &sharesGroups)
+	if err != nil {
+		return "", err
+	}
+
+	// Example: Re-encrypt each share (dummy encryption for demonstration)
+	for i, group := range sharesGroups {
+		for j, share := range group {
+			// Replace this with your actual encryption logic
+			sharesGroups[i][j] = "encrypted(" + newPassphrase + ":" + share + ")"
+		}
+	}
+
+	reEncryptedJSON, err := json.Marshal(sharesGroups)
+	if err != nil {
+		return "", err
+	}
+
+	return string(reEncryptedJSON), nil
+}
+
 func decodeQrFromImage(this js.Value, args []js.Value) interface{} {
 	// args[0]: Uint8Array containing JPEG image bytes
 

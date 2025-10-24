@@ -141,8 +141,7 @@ function setupEventListeners() {
         console.warn('generateShares function not found');
     }
 });
-
-document.getElementById('recoverBtn').addEventListener('click', () => {
+document.getElementById('recoverBtn').addEventListener('click', async () => {
   const passphrase = document.getElementById('passphrase').value || '';
   const re_passphrase = document.getElementById('repassphrase').value || '';
   const shares = [
@@ -156,41 +155,57 @@ document.getElementById('recoverBtn').addEventListener('click', () => {
     return;
   }
 
-  if (window.recoverShares) {
+  if (!window.recoverShares) {
+    console.warn('recoverShares function not found');
+    return;
+  }
+
+  try {
     const sharesGroups = [shares];
     const result = window.recoverShares(passphrase, JSON.stringify(sharesGroups));
-
-    // console.log('recoverShares result:', result);
-
     const outputEl = document.getElementById('recoverResult');
-    try {
-      const obj = typeof result === 'string' ? JSON.parse(result) : result;
+    const secureEl = document.getElementById('secureresult');
 
-      if (obj.error) {
-        outputEl.textContent = `Error: ${obj.error}`;
-        return;
-      }
+    const obj = typeof result === 'string' ? JSON.parse(result) : result;
 
-      outputEl.innerHTML = `<div><strong>Recovered Private Key (hex):</strong> ${obj.recoveredHex}</div>`;
+    if (obj.error) {
+      outputEl.textContent = `Error: ${obj.error}`;
+      return;
+    }
 
-      // Display regenerated shares like generateShares
-      if (obj.newShares) {
-        const newSharesGroups = JSON.parse(obj.newShares); 
-        displaySharesWithQR(newSharesGroups, outputEl);
+    // Show recovered private key
+    outputEl.innerHTML = `<div><strong>Recovered Private Key (hex):</strong> ${obj.recoveredHex}</div>`;
 
-        // re-encrypted shares if provide re-passphrase
-        if (re_passphrase != '') {
+    // Display regenerated shares
+    if (obj.newShares) {
+      const newSharesGroups = JSON.parse(obj.newShares);
+      await displaySharesWithQR(newSharesGroups, outputEl);
 
+        // Re-encrypt shares if re_passphrase is provided
+        if (re_passphrase !== '' && window.reEncryptShares) {
+            try {
+                // Only pass re_passphrase and the recovered shares
+                const reEncrypted = window.reEncryptShares(re_passphrase, JSON.stringify(newSharesGroups));
+                const reEncryptedGroups = typeof reEncrypted === 'string' ? JSON.parse(reEncrypted) : reEncrypted;
+
+                // Display re-encrypted shares just like recovered shares
+                const secureEl = document.getElementById('secureresult');
+                secureEl.innerHTML = ''; // Clear previous
+                displaySharesWithQR(reEncryptedGroups, secureEl);
+
+                console.log('Re-encrypted shares:', reEncryptedGroups);
+            } catch (e) {
+                secureEl.textContent = `Error re-encrypting shares: ${e.message}`;
+            }
         }
 
-      }
-    } catch (e) {
-      outputEl.textContent = String(result);
+
     }
-  } else {
-    console.warn('recoverShares function not found');
+  } catch (e) {
+    document.getElementById('recoverResult').textContent = String(e);
   }
 });
+
 
 // SCAN QRconst video = document.getElementById('video');
 const scanQrBtn = document.getElementById('scanQrBtn');

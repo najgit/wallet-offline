@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"image/jpeg"
 	"log"
 	"strings"
@@ -30,6 +29,7 @@ func main() {
 	js.Global().Set("recoverShares", js.FuncOf(jsRecoverShares))
 	js.Global().Set("generateQRCode", js.FuncOf(jsGenerateQRCode))
 	js.Global().Set("decodeQrFromImage", js.FuncOf(decodeQrFromImage))
+	js.Global().Set("reEncryptShares", js.FuncOf(jsReEncryptShares))
 
 	<-c // keep running
 }
@@ -129,32 +129,37 @@ func jsRecoverShares(this js.Value, args []js.Value) any {
 	}
 }
 
-// ReEncryptShares takes new passphrase and recovered shares JSON, returns re-encrypted shares JSON
-func ReEncryptShares(newPassphrase string, recoveredSharesJSON string) (string, error) {
-	if newPassphrase == "" {
-		return "", errors.New("new passphrase is empty")
+func jsReEncryptShares(this js.Value, args []js.Value) any {
+	passphrase := strings.TrimSpace(args[0].String())
+	privatekeyHex := args[1].String()
+
+	var pass []byte
+	if passphrase != "" {
+		pass = []byte(passphrase)
 	}
 
-	var sharesGroups ShareGroup
-	err := json.Unmarshal([]byte(recoveredSharesJSON), &sharesGroups)
+	masterSecret, err := hex.DecodeString(privatekeyHex)
 	if err != nil {
-		return "", err
+		return map[string]any{"error": err.Error()}
 	}
 
-	// Example: Re-encrypt each share (dummy encryption for demonstration)
-	for i, group := range sharesGroups {
-		for j, share := range group {
-			// Replace this with your actual encryption logic
-			sharesGroups[i][j] = "encrypted(" + newPassphrase + ":" + share + ")"
-		}
-	}
-
-	reEncryptedJSON, err := json.Marshal(sharesGroups)
+	groups, err := slip39.GenerateMnemonicsWithPassphrase(
+		1,
+		[]slip39.MemberGroupParameters{{MemberThreshold: 3, MemberCount: 5}},
+		masterSecret,
+		pass,
+	)
 	if err != nil {
-		return "", err
+		return map[string]any{"error": err.Error()}
 	}
 
-	return string(reEncryptedJSON), nil
+	sharesJSON, _ := json.Marshal(groups)
+	return map[string]any{
+		// "mnemonic":     mnemonic,
+		"masterKeyHex": hex.EncodeToString(masterSecret),
+		"shares":       string(sharesJSON),
+	}
+
 }
 
 func decodeQrFromImage(this js.Value, args []js.Value) interface{} {

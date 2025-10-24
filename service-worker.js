@@ -12,9 +12,14 @@ const OFFLINE_ASSETS = [
 
 // Pre-cache files during install
 self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(OFFLINE_ASSETS))
-  );
+    console.log("[SW] Installing and caching offline assets...");
+    event.waitUntil(
+        caches.open(CACHE_NAME).then(cache =>{
+                    console.log("[SW] Adding to cache:", OFFLINE_ASSETS);
+                    return cache.addAll(OFFLINE_ASSETS)
+                }
+            )
+    );
   self.skipWaiting();
 });
 

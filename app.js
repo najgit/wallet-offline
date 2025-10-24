@@ -112,18 +112,20 @@ function setupEventListeners() {
             outputDisplay =document.getElementById('genResult');
             outputDisplay.innerHTML = '';
             await displaySharesWithQR(sharesGroups, outputDisplay);
+
+            // --- New: populate share1,2,3 and trigger recover ---
+            if ( passphrase!= "" && sharesGroups[0] && sharesGroups[0].length >= 3) {
+                console.log("trigger recover botton....")
+                document.getElementById('share1').value = sharesGroups[0][0];
+                document.getElementById('share2').value = sharesGroups[0][1];
+                document.getElementById('share3').value = sharesGroups[0][2];
+
+                // Trigger recover button click programmatically
+                document.getElementById('recoverBtn').click();
+            }
+                
         }
         
-         // --- New: populate share1,2,3 and trigger recover ---
-        if (sharesGroups[0] && sharesGroups[0].length >= 3) {
-            console.log("add trigger recover botton....")
-          document.getElementById('share1').value = sharesGroups[0][0];
-          document.getElementById('share2').value = sharesGroups[0][1];
-          document.getElementById('share3').value = sharesGroups[0][2];
-
-          // Trigger recover button click programmatically
-          document.getElementById('recoverBtn').click();
-        }
 
         // Also display mnemonic and masterKeyHex normally
         const outputEl = document.getElementById('genResult');
@@ -142,6 +144,7 @@ function setupEventListeners() {
 
 document.getElementById('recoverBtn').addEventListener('click', () => {
   const passphrase = document.getElementById('passphrase').value || '';
+  const re_passphrase = document.getElementById('repassphrase').value || '';
   const shares = [
     document.getElementById('share1').value.trim(),
     document.getElementById('share2').value.trim(),
@@ -173,55 +176,12 @@ document.getElementById('recoverBtn').addEventListener('click', () => {
       // Display regenerated shares like generateShares
       if (obj.newShares) {
         const newSharesGroups = JSON.parse(obj.newShares); 
-
-        // let formattedShares = '';
-
-        // newSharesGroups.forEach((group, groupIdx) => {
-        //   formattedShares += `<div><strong>New Group ${groupIdx + 1}:</strong></div>`;
-        //   group.forEach((share, shareIdx) => {
-        //     formattedShares += `<div style="margin-bottom: 1em;">
-        //       <strong>Share ${shareIdx + 1}:</strong><br/>`;
-
-        //     // Add QR code container
-        //     const qrId = `newShareQR-${groupIdx}-${shareIdx}`;
-        //     formattedShares += `<canvas id="${qrId}" style="margin-bottom: 0.5em;"></canvas><br/>`;
-
-        //     // Share words in 3 columns
-        //     const words = share.split(' ');
-        //     formattedShares += '<table style="border-collapse: collapse;">';
-        //     for (let i = 0; i < words.length; i += 3) {
-        //       formattedShares += '<tr>';
-        //       for (let j = 0; j < 3; j++) {
-        //         const word = words[i + j];
-        //         if (word) {
-        //           formattedShares += `<td style="border: 1px solid #ccc; padding: 4px 8px; white-space: nowrap;">${word}</td>`;
-        //         } else {
-        //           formattedShares += '<td></td>';
-        //         }
-        //       }
-        //       formattedShares += '</tr>';
-        //     }
-        //     formattedShares += '</table></div>';
-        //   });
-        // });
-
-        // outputEl.innerHTML += `<div><strong>New Shares:</strong></div>${formattedShares}`;
-
         displaySharesWithQR(newSharesGroups, outputEl);
-    
 
-        // After inserting HTML, generate QR codes for each new share using JS QR lib
-        // newSharesGroups.forEach((group, groupIdx) => {
-        //   group.forEach((share, shareIdx) => {
-        //     const qrId = `newShareQR-${groupIdx}-${shareIdx}`;
-        //     const canvas = document.getElementById(qrId);
-        //     if (canvas) {
-        //       QRCode.toCanvas(canvas, share, { errorCorrectionLevel: 'M', margin: 1 }, function (error) {
-        //         if (error) console.error(error);
-        //       });
-        //     }
-        //   });
-        // });
+        // re-encrypted shares if provide re-passphrase
+        if (re_passphrase != '') {
+
+        }
 
       }
     } catch (e) {

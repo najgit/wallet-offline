@@ -1,15 +1,38 @@
+// --- Place this code block near the start of your app.js file ---
+
+if ('serviceWorker' in navigator) {
+  // We use '/service-worker.js' to ensure the browser looks at the site root, 
+  // and scope: '/' to ensure it controls the entire application.
+  navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+    .then(registration => {
+      console.log('Service Worker registered successfully. Scope:', registration.scope);
+    })
+    .catch(error => {
+      // This will show if the file is missing, the path is wrong, 
+      // or if there's a strict CSP issue still blocking the worker.
+      console.error('Service Worker registration failed:', error);
+    });
+} else {
+  console.log('Service Workers are not supported in this browser.');
+}
+
+// -----------------------------------------------------------------
+
 const go = new Go();
 
 async function loadWasm() {
-  const response = await fetch('main.wasm');
-  const bytes = await response.arrayBuffer();
-  const result = await WebAssembly.instantiate(bytes, go.importObject);
-  go.run(result.instance);
+    // ... existing WASM loading logic ...
+    const response = await fetch('main.wasm');
+    const bytes = await response.arrayBuffer();
+    const result = await WebAssembly.instantiate(bytes, go.importObject);
+    go.run(result.instance);
 
     // Now WASM is ready, set up event listeners
-  setupEventListeners();
-  console.log("WASM loaded");
+    setupEventListeners();
+    console.log("WASM loaded");
 }
+
+
 
 
 async function displaySharesWithQR(sharesGroups, outputEl) {

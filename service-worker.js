@@ -1,4 +1,4 @@
-const CACHE_NAME = "wallet-pwa-v2";
+const CACHE_NAME = "wallet-pwa-v3";
 const OFFLINE_ASSETS = [
   "./",
   "./index.html",
@@ -10,6 +10,7 @@ const OFFLINE_ASSETS = [
   "./icons/icon-512.png"
 ];
 
+// Pre-cache files during install
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(OFFLINE_ASSETS))
@@ -17,6 +18,7 @@ self.addEventListener("install", event => {
   self.skipWaiting();
 });
 
+// Remove old caches when new version activates
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -26,22 +28,31 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
+// Main offline-first fetch handler
 self.addEventListener("fetch", event => {
+  // Always serve cached index.html for navigation requests (reloads, startup)
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      caches.match("./index.html").then(response => response || fetch(event.request))
+    );
+    return;
+  }
+
+  // For other requests (JS, CSS, WASM, icons, etc.)
   event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
+    caches.match(event.request).then(response => {
+      // Return from cache or fetch and update cache
+      return (
+        response ||
+        fetch(event.request)
+          .then(fetchRes => {
+            // Cache new responses
+            const clone = fetchRes.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+            return fetchRes;
+          })
+          .catch(() => caches.match("./index.html")) // fallback offline page
+      );
+    })
   );
 });
-
-// self.addEventListener("fetch", event => {
-//   // Serve all requests from cache, fall back to network only if missing
-//   event.respondWith(
-//     caches.match(event.request).then(response =>
-//       response || fetch(event.request).then(fetchRes => {
-//         // Optionally cache any new responses
-//         const clone = fetchRes.clone();
-//         caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-//         return fetchRes;
-//       })
-//     )
-//   );
-// });

@@ -165,6 +165,7 @@ document.getElementById('recoverBtn').addEventListener('click', async () => {
     const result = window.recoverShares(passphrase, JSON.stringify(sharesGroups));
     const outputEl = document.getElementById('recoverResult');
     const secureEl = document.getElementById('secureResult');
+    secureEl.innerHTML = ''; // Clear previous
 
     const obj = typeof result === 'string' ? JSON.parse(result) : result;
 
@@ -194,7 +195,6 @@ document.getElementById('recoverBtn').addEventListener('click', async () => {
                 }
                 
                 // Display re-encrypted shares just like recovered shares
-                secureEl.innerHTML = ''; // Clear previous
 
                 const newSharesGroups = JSON.parse(reEncryptedGroups.shares);
                 await displaySharesWithQR(newSharesGroups, secureEl);

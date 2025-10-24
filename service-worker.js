@@ -27,15 +27,21 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  // Serve all requests from cache, fall back to network only if missing
   event.respondWith(
-    caches.match(event.request).then(response =>
-      response || fetch(event.request).then(fetchRes => {
-        // Optionally cache any new responses
-        const clone = fetchRes.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        return fetchRes;
-      })
-    )
+    caches.match(event.request).then(response => response || fetch(event.request))
   );
 });
+
+// self.addEventListener("fetch", event => {
+//   // Serve all requests from cache, fall back to network only if missing
+//   event.respondWith(
+//     caches.match(event.request).then(response =>
+//       response || fetch(event.request).then(fetchRes => {
+//         // Optionally cache any new responses
+//         const clone = fetchRes.clone();
+//         caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+//         return fetchRes;
+//       })
+//     )
+//   );
+// });

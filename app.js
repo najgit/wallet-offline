@@ -393,8 +393,8 @@ function setupEventListeners() {
             // Also display mnemonic and masterKeyHex normally
             const outputEl = document.getElementById('genResult');
             outputEl.insertAdjacentHTML('afterbegin',
-                `<div><strong>Mnemonic:</strong> ${obj.mnemonic}</div>` +
-                `<div><strong>Master Key (hex):</strong> ${obj.masterKeyHex}</div>`
+                `<div class='text-box-wrap'><strong>Mnemonic:</strong> ${obj.mnemonic}</div>` +
+                `<div class='text-box-wrap'><strong>Master Key (hex):</strong> ${obj.masterKeyHex}</div>`
             );
         
         } catch (e) {

@@ -200,8 +200,8 @@ function setupEventListeners() {
                     // Trigger recover button click programmatically
                     document.getElementById('recoverBtn').click();
 
-                    document.getElementById('recoverMnemonic').click();
-                    document.getElementById('recoverPrivate').click();
+                    // document.getElementById('recoverMnemonic').click();
+                    // document.getElementById('recoverPrivate').click();
                 }
                     
             }

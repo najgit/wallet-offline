@@ -41,7 +41,8 @@
 </head>
 <body>
   <h1>VERSION 1.1.1</h1>
-  <button id="updateApp">Update App</button>
+  <button id="updateApp">Update App</button> &nbsp;
+  <button id="secure-clear">🧹 Clear Everything</button>
   <h1>SLIP39 PWA</h1>
 <input id="passphrase"
         autocomplete="off"
@@ -67,7 +68,7 @@
 
 
   <h4>Recover from encrypted Mnemonic</h4>
-  <textarea id="mnemonic" rows="2" cols="60"></textarea><br />
+  <textarea id="mnemonic" rows="5" cols="60"></textarea><br />
   <button id="scanQrMnemonic">Scan QR input</button>
   <button id="recoverMnemonic">Recover from Mnemonic</button>
   <video id="videoMn" style="display:none;" width="300" height="200" autoplay></video>
@@ -76,7 +77,7 @@
   <br />
   
   <h4>Recover from encrypted Private key</h4>
-  <textarea id="privatekey" rows="2" cols="60"></textarea><br />
+  <textarea id="privatekey" rows="5" cols="60"></textarea><br />
   <button id="scanQrPrivate">Scan QR input</button>
   <button id="recoverPrivate">Recover from Private key</button>
   <video id="videoPriv" style="display:none;" width="300" height="200" autoplay></video>
@@ -89,13 +90,13 @@
 <br/>
 <br/>
   <label for="share1">Share 1:</label><br />
-  <textarea id="share1" rows="2" cols="60"></textarea><br />
+  <textarea id="share1" rows="5" cols="60"></textarea><br />
   
   <label for="share2">Share 2:</label><br />
-  <textarea id="share2" rows="2" cols="60"></textarea><br />
+  <textarea id="share2" rows="5" cols="60"></textarea><br />
   
   <label for="share3">Share 3:</label><br />
-  <textarea id="share3" rows="2" cols="60"></textarea><br />
+  <textarea id="share3" rows="5" cols="60"></textarea><br />
 </div>
 <br/><br/>
 <button id="recoverBtn">Recover encrypted shares with passphrase</button>
@@ -109,6 +110,7 @@
 <pre id="recoverResult"></pre>
 
 <h1>Re-encrypted shares</h1>
+<pre id="mnemonicReEncrypt"></pre>
 <pre id="keyReEncrypt"></pre>
 <pre id="secureResult"></pre>
 </body>

@@ -32,6 +32,51 @@ async function loadWasm() {
     console.log("WASM loaded");
 }
 
+async function secureClear() {
+      console.log("Clearing sensitive data…");
+
+      // 1️⃣ Clear all input fields
+      document.querySelectorAll('input').forEach(input => {
+        input.value = '';
+        input.blur();
+      });
+
+      // 2️⃣ Clear storage
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch (err) {
+        console.warn("Storage clear failed:", err);
+      }
+
+      // 3️⃣ Delete all IndexedDB databases
+      if ('indexedDB' in window) {
+        try {
+          const dbs = await indexedDB.databases();
+          for (const db of dbs) {
+            if (db.name) {
+              console.log("Deleting DB:", db.name);
+              indexedDB.deleteDatabase(db.name);
+            }
+          }
+        } catch (err) {
+          console.warn("IndexedDB clear failed:", err);
+        }
+      }
+
+      // 4️⃣ (Optional) Clear in-memory WASM or JS variables
+      if (window.GoWasmMemory) {
+        // Example placeholder for clearing Go state if you track it
+        window.GoWasmMemory = null;
+      }
+
+      // 5️⃣ Give the browser a moment, then hard reload
+      setTimeout(() => {
+        console.log("Reloading page securely…");
+        window.location.reload(true); // true = force reload from server
+      }, 150);
+    }
+
 
 async function displayQR(qrData, qrText, outputEl) {
 
@@ -141,18 +186,10 @@ async function checkInternetConnection() {
 
 
 function setupEventListeners() {
+    document.getElementById('secure-clear').addEventListener('click', secureClear);
 
     document.getElementById('updateApp').addEventListener('click', async () => {
         try {
-            //  const confirmed = confirm(
-            //     "Internet connection require to update the latest version.\n\nDo you want to continue?"
-            // );
-
-            // if (!confirmed) {
-            //     console.log("Update canceled by user.");
-            //     return; // User clicked Cancel
-            // }
-
              // Step 1: Check network connectivity
             const online = await checkInternetConnection();
             if (!online) {
@@ -190,16 +227,56 @@ function setupEventListeners() {
 
     document.getElementById('recoverMnemonic').addEventListener('click', async () => {
         const passphrase = document.getElementById('passphrase').value || '';
+        const re_passphrase = document.getElementById('repassphrase').value || '';
+
+        const outputEl = document.getElementById('recoverResult');
+        const secureEl = document.getElementById('secureResult');
+
+        const mnemonicRecover = document.getElementById('mnemonicRecover');
+        const keyRecover = document.getElementById('keyRecover');
+        
+        const mnemonicReEncrypt = document.getElementById('mnemonicReEncrypt');
+        const keyReEncrypt = document.getElementById('keyReEncrypt');
+
+        outputEl.innerHTML  ='';
+        secureEl.innerHTML = ''; // Clear previous
+        keyReEncrypt.innerHTML = '';
+        mnemonicRecover.innerHTML = '';
+        keyRecover.innerHTML = '';
+        mnemonicReEncrypt.innerHTML = '';
+        
         if(window.recoverFromAEStoString) {
             document.getElementById('mnemonicRecover').value = '';
             // console.log('generateShares result:', result);
 
             try {
-                const result = window.recoverFromAEStoString(passphrase, document.getElementById('mnemonic').value);
+                const result = window.recoverFromAEStoString(passphrase, document.getElementById('mnemonic').value, re_passphrase);
                 const obj = typeof result === 'string' ? JSON.parse(result) : result;
+
                 if (obj.decrypted) {
-                    document.getElementById('mnemonicRecover').textContent = "recovered mnemonic: "+ obj.decrypted;
+                    mnemonicRecover.textContent = "recovered mnemonic: "+ obj.decrypted;
+                    keyRecover.textContent = "recovered private: "+ obj.masterKeyHex;
+
+                    const newSharesGroups = JSON.parse(obj.shares);
+                    await displaySharesWithQR(newSharesGroups, outputEl);
                 }
+                
+                if (re_passphrase != ''){ 
+
+                    if (obj.error) {
+                        outputEl.textContent = `Error: ${obj.error}`;
+                        return;
+                    }
+                    
+                    // Display re-encrypted shares just like recovered shares
+                    displayQR(obj.encMnemonic, "Mnemonic: "+obj.encMnemonic, mnemonicReEncrypt)
+                    displayQR(obj.encMasterKeyHex, "Private: "+obj.encMasterKeyHex, keyReEncrypt)
+
+                    const newSharesGroups = JSON.parse(obj.encShares);
+                    await displaySharesWithQR(newSharesGroups, secureEl);
+
+                }
+
             
             } catch (e) {
                 document.getElementById('mnemonicRecover').textContent = String(result);
@@ -225,6 +302,7 @@ function setupEventListeners() {
             }
         }
     });
+
   document.getElementById('genBtn').addEventListener('click', async () => {
     const passphrase = document.getElementById('passphrase').value || '';
     if (window.generateShares) {
@@ -280,6 +358,7 @@ function setupEventListeners() {
         console.warn('generateShares function not found');
     }
 });
+
 document.getElementById('recoverBtn').addEventListener('click', async () => {
   const passphrase = document.getElementById('passphrase').value || '';
   const re_passphrase = document.getElementById('repassphrase').value || '';

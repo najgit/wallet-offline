@@ -129,6 +129,14 @@ async function displaySharesWithQR(sharesGroups, outputEl) {
 
 
 function setupEventListeners() {
+
+    document.getElementById('recoverMnemonic').addEventListener('click', async () => {
+        alert('click')
+    });
+    
+    document.getElementById('recoverPrivate').addEventListener('click', async () => {
+        alert('click recoverPrivate')
+    });
   document.getElementById('genBtn').addEventListener('click', async () => {
     const passphrase = document.getElementById('passphrase').value || '';
     if (window.generateShares) {
@@ -157,8 +165,14 @@ function setupEventListeners() {
                 document.getElementById('share2').value = sharesGroups[0][1];
                 document.getElementById('share3').value = sharesGroups[0][2];
 
+                document.getElementById('mnemonic').value =  obj.encMnemonic
+                document.getElementById('privatekey').value = obj.encMasterKeyHex
+
                 // Trigger recover button click programmatically
                 document.getElementById('recoverBtn').click();
+
+                document.getElementById('recoverMnemonic').click();
+                document.getElementById('recoverPrivate').click();
             }
                 
         }

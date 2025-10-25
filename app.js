@@ -453,7 +453,7 @@ document.getElementById('recoverBtn').addEventListener('click', async () => {
 
     // Show recovered private key
     // outputEl.innerHTML = `<div><strong>Recovered Private Key (hex):</strong> ${obj.recoveredHex}</div>`;
-    displayQR(obj.recoveredHex,"recovered private: <div style='width: 100%'"+ obj.recoveredHex, keyRecover)
+    displayQR(obj.recoveredHex,"recovered private: <div style='width: 100%;display: block'>"+ obj.recoveredHex +"</div>", keyRecover)
 
     // Display regenerated shares
     if (obj.newShares) {

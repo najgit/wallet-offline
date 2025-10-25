@@ -14,14 +14,35 @@
   <h1>SLIP39 PWA</h1>
 <input id="passphrase" placeholder="Enter passphrase" style="width: 100%; box-sizing: border-box;" />
 <button id="genBtn">Generate Shares</button>
+<pre id="mnemonicResult"></pre>
+<pre id="keyResult"></pre>
 <pre id="genResult"></pre>
 
 
 <div>
+
+
+  <h4>Recover from encrypted Mnemonic</h4>
+  <textarea id="mnemonic" rows="2" cols="60"></textarea><br />
+  <button id="scanQrMnemonic">Scan QR input</button>
+  <button id="recoverMnemonic">Recover from Mnemonic</button>
+  <video id="videoMn" style="display:none;" width="300" height="200" autoplay></video>
+
+  <br />
+  <br />
+  
+  <h4>Recover from encrypted Private key</h4>
+  <textarea id="privatekey" rows="2" cols="60"></textarea><br />
+  <button id="scanQrPrivate">Scan QR input</button>
+  <button id="recoverPrivate">Recover from Mnemonic</button>
+  <video id="videoPriv" style="display:none;" width="300" height="200" autoplay></video>
+
+  <br />
 <br/>
+<h4>Recover from at least 3 shares</h4>
 <button id="scanQrBtn">Scan QR input</button>
 <video id="video" style="display:none;" width="300" height="200" autoplay></video>
-
+<br/>
 <br/>
   <label for="share1">Share 1:</label><br />
   <textarea id="share1" rows="2" cols="60"></textarea><br />
@@ -33,18 +54,21 @@
   <textarea id="share3" rows="2" cols="60"></textarea><br />
 </div>
 <br/><br/>
-<input id="repassphrase" placeholder="Enter new passphrase" style="width: 100%; box-sizing: border-box;" />
-<br/>
+<input id="repassphrase" placeholder="Enter new passphrase for re-encrypted" style="width: 100%; box-sizing: border-box;" />
+<br/><br/>
 <button id="recoverBtn">Recover encrypted shares with passphrase</button>
 <br/>
 <br/>
 
-
  
-<h1>recovered shares</h1>
+<h1>Recovered shares (real wallet)</h1>
+<pre id="mnemonicRecover"></pre>
+<pre id="keyRecover"></pre>
 <pre id="recoverResult"></pre>
 
 <h1>Re-encrypted shares</h1>
+<pre id="mnemonicReEncrypt"></pre>
+<pre id="keyReEncrypt"></pre>
 <pre id="secureResult"></pre>
 </body>
 </html>

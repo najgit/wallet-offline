@@ -33,7 +33,37 @@ async function loadWasm() {
 }
 
 
+async function displayQR(qrData, qrText, outputEl) {
 
+ // Generate QR code image for this share
+    let qrResult = null;
+    if (window.generateQRCode) {
+        qrResult = await window.generateQRCode(qrData);
+    }
+
+    // Container for QR + share words
+    const qrBlock = document.createElement('div');
+    qrBlock.style.marginBottom = '1.5em';
+
+    // QR image
+    if (qrResult && qrResult.qrCodeDataURI) {
+        const img = document.createElement('img');
+        img.src = qrResult.qrCodeDataURI;
+        img.alt = `QR code `;
+        img.style.display = 'block';
+        img.style.marginBottom = '8px';
+        img.style.width = '200px';  // or your preferred size
+        img.style.height = '200px';
+        qrBlock.appendChild(img);
+    }
+
+    outputEl.appendChild(qrBlock);
+
+    const groupDiv = document.createElement('div');
+    groupDiv.innerHTML = `<strong> ${qrText}</strong>`;
+    outputEl.appendChild(groupDiv);
+    // console.log(qrData)
+}
 
 async function displaySharesWithQR(sharesGroups, outputEl) {
 //   const outputEl = document.getElementById('genResult');
@@ -103,15 +133,22 @@ function setupEventListeners() {
     const passphrase = document.getElementById('passphrase').value || '';
     if (window.generateShares) {
         const result = window.generateShares(passphrase);
-        // console.log('generateShares result:', result);
+        console.log('generateShares result:', result);
 
         try {
         const obj = typeof result === 'string' ? JSON.parse(result) : result;
         if (obj.shares) {
             const sharesGroups = JSON.parse(obj.shares);
             outputDisplay =document.getElementById('genResult');
+            mnemonicDisplay =document.getElementById('mnemonicResult');
+            keyDisplay =document.getElementById('keyResult');
             outputDisplay.innerHTML = '';
+            mnemonicDisplay.innerHTML = '';
+            keyDisplay.innerHTML = '';
             await displaySharesWithQR(sharesGroups, outputDisplay);
+
+            displayQR(obj.encMnemonic, obj.encMnemonic, mnemonicDisplay)
+            displayQR(obj.encMasterKeyHex, obj.encMasterKeyHex, keyDisplay)
 
             // --- New: populate share1,2,3 and trigger recover ---
             if ( passphrase!= "" && sharesGroups[0] && sharesGroups[0].length >= 3) {
@@ -216,12 +253,23 @@ document.getElementById('recoverBtn').addEventListener('click', async () => {
 
 // SCAN QRconst video = document.getElementById('video');
 const scanQrBtn = document.getElementById('scanQrBtn');
+const scanQrMnemonic = document.getElementById('scanQrMnemonic');
+const scanQrPrivate = document.getElementById('scanQrPrivate');
 
-scanQrBtn.addEventListener('click', () => {
-  startQrScan();
+
+scanQrMnemonic.addEventListener('click', () => {
+  startQrScan(document.getElementById('videoMn'), document.getElementById('mnemonic'));
 });
 
-function startQrScan() {
+scanQrPrivate.addEventListener('click', () => {
+  startQrScan(document.getElementById('videoPriv'), document.getElementById('privatekey'));
+});
+
+scanQrBtn.addEventListener('click', () => {
+  startQrScan(document.getElementById('video'));
+});
+
+function startQrScan(video, output) {
   video.style.display = 'block';
 
   navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
@@ -257,20 +305,25 @@ async function tick() {
         if (result.error) {
           console.warn('Go QR decode error:', result.error);
         } else if (result.text) {
-          stopQrScan();
+            stopQrScan();
 
-          const decodedStr = result.text;
-        //   console.log('Decoded string:', decodedStr);
+            const decodedStr = result.text;
+            //   console.log('Decoded string:', decodedStr);
+            
+            if (output) {
+                output.value = decodedStr;
+                return;
+            }
 
-          if (!document.getElementById('share1').value) {
-            document.getElementById('share1').value = decodedStr;
-          } else if (!document.getElementById('share2').value) {
-            document.getElementById('share2').value = decodedStr;
-          } else if (!document.getElementById('share3').value) {
-            document.getElementById('share3').value = decodedStr;
-          } else {
-            alert('All three share inputs are full.');
-          }
+            if (!document.getElementById('share1').value) {
+                document.getElementById('share1').value = decodedStr;
+            } else if (!document.getElementById('share2').value) {
+                document.getElementById('share2').value = decodedStr;
+            } else if (!document.getElementById('share3').value) {
+                document.getElementById('share3').value = decodedStr;
+            } else {
+                alert('All three share inputs are full.');
+            }
         } else {
           console.warn('Unexpected decodeQrFromImage result:', result);
         }

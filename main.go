@@ -4,10 +4,16 @@ package main
 
 import (
 	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"image/jpeg"
+	"io"
 	"log"
 	"strings"
 	"syscall/js"
@@ -18,6 +24,7 @@ import (
 	skip2qrcode "github.com/skip2/go-qrcode"
 	"github.com/tyler-smith/go-bip32"
 	"github.com/tyler-smith/go-bip39"
+	"golang.org/x/crypto/argon2"
 )
 
 type ShareGroup [][]string
@@ -81,11 +88,32 @@ func jsGenerateShares(this js.Value, args []js.Value) any {
 		return map[string]any{"error": err.Error()}
 	}
 
+	var enc_masterKeyHex string
+	var enc_mnemonic string
+	var errenc error
+
+	masterkeyHex := hex.EncodeToString(masterSecret)
+	if passphrase != "" {
+		enc_mnemonic, errenc = Encrypt(pass, []byte(mnemonic))
+
+		if errenc != nil {
+			return map[string]any{"error": errenc.Error()}
+		}
+
+		enc_masterKeyHex, errenc = Encrypt(pass, masterSecret)
+
+		if errenc != nil {
+			return map[string]any{"error": errenc.Error()}
+		}
+	}
+
 	sharesJSON, _ := json.Marshal(groups)
 	return map[string]any{
-		"mnemonic":     mnemonic,
-		"masterKeyHex": hex.EncodeToString(masterSecret),
-		"shares":       string(sharesJSON),
+		"mnemonic":        mnemonic,
+		"encMnemonic":     enc_mnemonic,
+		"masterKeyHex":    masterkeyHex,
+		"encMasterKeyHex": enc_masterKeyHex,
+		"shares":          string(sharesJSON),
 	}
 }
 
@@ -194,4 +222,100 @@ func decodeQrFromImage(this js.Value, args []js.Value) interface{} {
 
 	// Return decoded text
 	return map[string]interface{}{"text": result.GetText()}
+}
+
+// ===============================
+// Key Derivation (Argon2id)
+// ===============================
+func DeriveKeyArgon2id(password, salt []byte) []byte {
+	// Tunable Argon2id parameters for security vs performance
+	const (
+		time    = 3         // Number of iterations
+		memory  = 64 * 1024 // 64 MB memory usage
+		threads = 2         // Number of threads
+		keyLen  = 32        // 32 bytes = 256 bits
+	)
+
+	return argon2.IDKey(password, salt, time, memory, uint8(threads), uint32(keyLen))
+}
+
+// ===============================
+// Encryption Function
+// ===============================
+// Encrypts plaintext with AES-256-GCM derived from password using Argon2id.
+// Returns hex string encoding [salt || nonce || ciphertext].
+func Encrypt(password []byte, plaintext []byte) (string, error) {
+	// Generate random 16-byte salt
+	salt := make([]byte, 16)
+	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
+		return "", fmt.Errorf("failed to generate salt: %w", err)
+	}
+
+	// Derive key using Argon2id
+	key := DeriveKeyArgon2id(password, salt)
+
+	// Create AES cipher
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", fmt.Errorf("cipher init error: %w", err)
+	}
+
+	// Create GCM
+	aesgcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", fmt.Errorf("GCM init error: %w", err)
+	}
+
+	// Generate random nonce (12 bytes recommended for GCM)
+	nonce := make([]byte, aesgcm.NonceSize())
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		return "", fmt.Errorf("failed to generate nonce: %w", err)
+	}
+
+	// Encrypt
+	ciphertext := aesgcm.Seal(nil, nonce, plaintext, nil)
+
+	// Combine [salt || nonce || ciphertext]
+	output := append(salt, nonce...)
+	output = append(output, ciphertext...)
+
+	return hex.EncodeToString(output), nil
+}
+
+// ===============================
+// Decryption Function
+// ===============================
+// Decrypts hex-encoded [salt || nonce || ciphertext] using Argon2id-derived key.
+func Decrypt(password []byte, hexCipher string) ([]byte, error) {
+	data, err := hex.DecodeString(hexCipher)
+	if err != nil {
+		return nil, fmt.Errorf("invalid hex input: %w", err)
+	}
+
+	if len(data) < 16+12 {
+		return nil, errors.New("input too short")
+	}
+
+	salt := data[:16]
+	nonce := data[16:28]
+	ciphertext := data[28:]
+
+	key := DeriveKeyArgon2id(password, salt)
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, fmt.Errorf("cipher init error: %w", err)
+	}
+
+	aesgcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, fmt.Errorf("GCM init error: %w", err)
+	}
+
+	plaintext, err := aesgcm.Open(nil, nonce, ciphertext, nil)
+	if err != nil {
+		return nil, fmt.Errorf("decryption failed: %w", err)
+	}
+
+	return plaintext, nil
 }

@@ -133,7 +133,7 @@ function setupEventListeners() {
     const passphrase = document.getElementById('passphrase').value || '';
     if (window.generateShares) {
         const result = window.generateShares(passphrase);
-        console.log('generateShares result:', result);
+        // console.log('generateShares result:', result);
 
         try {
         const obj = typeof result === 'string' ? JSON.parse(result) : result;
@@ -307,11 +307,12 @@ async function tick(video, output) {
           console.warn('Go QR decode error:', result.error);
         } else if (result.text) {
             stopQrScan(video);
-alert('scan complete');
+
             const decodedStr = result.text;
             //   console.log('Decoded string:', decodedStr);
-            
+            alert(decodedStr);
             if (output != 'undefined') {
+                alert(output);
                 output.value = decodedStr;
                 return;
             }

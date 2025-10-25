@@ -133,7 +133,7 @@ function setupEventListeners() {
     document.getElementById('recoverMnemonic').addEventListener('click', async () => {
         const passphrase = document.getElementById('passphrase').value || '';
         if(window.recoverFromAEStoString) {
-            
+            document.getElementById('mnemonic').value = ''
              const result = window.recoverFromAEStoString(passphrase, document.getElementById('mnemonic').value);
             // console.log('generateShares result:', result);
 
@@ -152,6 +152,7 @@ function setupEventListeners() {
     document.getElementById('recoverPrivate').addEventListener('click', async () => {
         const passphrase = document.getElementById('passphrase').value || '';
         if(window.recoverFromAEStoHex) {
+            document.getElementById('privatekey').value=''
              const result = window.recoverFromAEStoHex(passphrase, document.getElementById('privatekey').value);
             // console.log('generateShares result:', result);
 

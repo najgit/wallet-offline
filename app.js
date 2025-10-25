@@ -184,8 +184,8 @@ function setupEventListeners() {
                 keyDisplay.innerHTML = '';
                 await displaySharesWithQR(sharesGroups, outputDisplay);
 
-                displayQR(obj.encMnemonic, obj.encMnemonic, mnemonicDisplay)
-                displayQR(obj.encMasterKeyHex, obj.encMasterKeyHex, keyDisplay)
+                displayQR(obj.encMnemonic, "Mnemonic: "+ obj.encMnemonic, mnemonicDisplay)
+                displayQR(obj.encMasterKeyHex, "Private: "+ obj.encMasterKeyHex, keyDisplay)
 
                 // --- New: populate share1,2,3 and trigger recover ---
                 if ( passphrase!= "" && sharesGroups[0] && sharesGroups[0].length >= 3) {
@@ -245,6 +245,7 @@ document.getElementById('recoverBtn').addEventListener('click', async () => {
     const result = window.recoverShares(passphrase, JSON.stringify(sharesGroups));
     const outputEl = document.getElementById('recoverResult');
     const secureEl = document.getElementById('secureResult');
+    const keyReEncrypt = document.getElementById('keyReEncrypt');
     secureEl.innerHTML = ''; // Clear previous
 
     const obj = typeof result === 'string' ? JSON.parse(result) : result;
@@ -275,6 +276,8 @@ document.getElementById('recoverBtn').addEventListener('click', async () => {
                 }
                 
                 // Display re-encrypted shares just like recovered shares
+
+                displayQR(reEncryptedGroups.encMasterKeyHex, "Private: "+reEncryptedGroups.encMasterKeyHex, keyReEncrypt)
 
                 const newSharesGroups = JSON.parse(reEncryptedGroups.shares);
                 await displaySharesWithQR(newSharesGroups, secureEl);

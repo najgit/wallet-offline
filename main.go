@@ -218,11 +218,21 @@ func jsReEncryptShares(this js.Value, args []js.Value) any {
 		return map[string]any{"error": err.Error()}
 	}
 
+	var enc_masterKeyHex string
+
+	if passphrase != "" {
+		enc_masterKeyHex, err = encrypt(pass, masterSecret)
+		if err != nil {
+			return map[string]any{"error": err.Error()}
+		}
+	}
+
 	sharesJSON, _ := json.Marshal(groups)
 	return map[string]any{
 		// "mnemonic":     mnemonic,
-		"masterKeyHex": hex.EncodeToString(masterSecret),
-		"shares":       string(sharesJSON),
+		"masterKeyHex":    hex.EncodeToString(masterSecret),
+		"encMasterKeyHex": enc_masterKeyHex,
+		"shares":          string(sharesJSON),
 	}
 
 }

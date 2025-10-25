@@ -37,10 +37,18 @@
     outline: none;
   }
 
-  .wrap-text {
-    white-space: normal;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+  .text-box-wrap {
+    width: 100%;                   /* fill screen width */
+    max-width: 100vw;              /* prevent overflow on small screens */
+    box-sizing: border-box;
+    padding: 12px;
+    background-color: #f8f8f8;
+    border: 1px solid #ccc;
+    font-family: monospace;        /* align better for long hashes */
+    word-wrap: break-word;         /* legacy support */
+    overflow-wrap: break-word;     /* modern browsers */
+    white-space: pre-wrap;         /* wrap but keep any line breaks */
+    line-break: anywhere;          /* ensure wrapping even in long hex strings */
     }
 </style>
 

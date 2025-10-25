@@ -509,7 +509,10 @@ func jsRecoverFromAEStoHex(this js.Value, args []js.Value) any {
 			return map[string]any{"error": err.Error()}
 		}
 	} else {
-		masterSecret = []byte(strings.TrimSpace(masterSecretHex))
+		masterSecret, err = hex.DecodeString(strings.TrimSpace(masterSecretHex))
+		if err != nil {
+			return map[string]any{"error": err.Error()}
+		}
 	}
 
 	groups, err := slip39.GenerateMnemonicsWithPassphrase(
@@ -555,6 +558,7 @@ func jsRecoverFromAEStoHex(this js.Value, args []js.Value) any {
 	sharesJSON, _ := json.Marshal(groups)
 	sharesJSONEncrypt, _ := json.Marshal(re_encrypt_groups)
 	return map[string]any{
+		"original":        masterSecretHex,
 		"decrypted":       masterkeyHex,
 		"encMasterKeyHex": enc_masterKeyHex,
 		"shares":          string(sharesJSON),

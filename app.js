@@ -312,9 +312,10 @@ function setupEventListeners() {
             // console.log('generateShares result:', result);
 
             try {
+                console.log(document.getElementById('privatekey').value);
                 const result = window.recoverFromAEStoHex(passphrase, document.getElementById('privatekey').value, re_passphrase);
                 const obj = typeof result === 'string' ? JSON.parse(result) : result;
-
+                
                 if (obj.decrypted) {
                     // mnemonicRecover.textContent = "recovered mnemonic: "+ obj.decrypted;
                     // keyRecover.textContent = "recovered private: "+ obj.decrypted;

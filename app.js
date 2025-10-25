@@ -307,7 +307,7 @@ async function tick(video, output) {
           console.warn('Go QR decode error:', result.error);
         } else if (result.text) {
             stopQrScan(video);
-
+alert('scan complete');
             const decodedStr = result.text;
             //   console.log('Decoded string:', decodedStr);
             
@@ -315,7 +315,7 @@ async function tick(video, output) {
                 output.value = decodedStr;
                 return;
             }
-             alert('scan complete');
+            
             if (!document.getElementById('share1').value) {
                 document.getElementById('share1').value = decodedStr;
             } else if (!document.getElementById('share2').value) {

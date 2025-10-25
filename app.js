@@ -131,15 +131,16 @@ async function displaySharesWithQR(sharesGroups, outputEl) {
 function setupEventListeners() {
 
     document.getElementById('recoverMnemonic').addEventListener('click', async () => {
+        const passphrase = document.getElementById('passphrase').value || '';
         if(window.recoverFromAES) {
             
-             const result = window.recoverFromAES( document.getElementById('mnemonic').value);
+             const result = window.recoverFromAES(passphrase, document.getElementById('mnemonic').value);
             // console.log('generateShares result:', result);
 
             try {
                 const obj = typeof result === 'string' ? JSON.parse(result) : result;
-                if (obj.data) {
-                    document.getElementById('mnemonicRecover').textContent = "recovered mnemonic: "+ obj.data;
+                if (obj.decrypted) {
+                    document.getElementById('mnemonicRecover').textContent = "recovered mnemonic: "+ obj.decrypted;
                 }
             
             } catch (e) {
@@ -149,14 +150,15 @@ function setupEventListeners() {
     });
     
     document.getElementById('recoverPrivate').addEventListener('click', async () => {
+        const passphrase = document.getElementById('passphrase').value || '';
         if(window.recoverFromAES) {
-             const result = window.recoverFromAES(document.getElementById('privatekey').value);
+             const result = window.recoverFromAES(passphrase, document.getElementById('privatekey').value);
             // console.log('generateShares result:', result);
 
             try {
                 const obj = typeof result === 'string' ? JSON.parse(result) : result;
-                if (obj.data) {
-                    document.getElementById('keyRecover').textContent ="recovered private key: "+ obj.data;
+                if (obj.decrypted) {
+                    document.getElementById('keyRecover').textContent ="recovered private key: "+ obj.decrypted;
                 }
             
             } catch (e) {

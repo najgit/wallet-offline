@@ -306,7 +306,7 @@ async function tick(video, output) {
         if (result.error) {
           console.warn('Go QR decode error:', result.error);
         } else if (result.text) {
-            stopQrScan();
+            stopQrScan(video);
 
             const decodedStr = result.text;
             //   console.log('Decoded string:', decodedStr);
@@ -315,7 +315,7 @@ async function tick(video, output) {
                 output.value = decodedStr;
                 return;
             }
-
+             alert('scan complete');
             if (!document.getElementById('share1').value) {
                 document.getElementById('share1').value = decodedStr;
             } else if (!document.getElementById('share2').value) {
@@ -337,7 +337,7 @@ async function tick(video, output) {
 }
 
 
-function stopQrScan() {
+function stopQrScan(video) {
   video.style.display = 'none';
   const stream = video.srcObject;
   if (stream) {

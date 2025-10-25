@@ -310,7 +310,7 @@ async function tick() {
             const decodedStr = result.text;
             //   console.log('Decoded string:', decodedStr);
             
-            if (output) {
+            if (output != 'undefined') {
                 output.value = decodedStr;
                 return;
             }

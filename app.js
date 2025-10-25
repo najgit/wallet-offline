@@ -132,9 +132,9 @@ function setupEventListeners() {
 
     document.getElementById('recoverMnemonic').addEventListener('click', async () => {
         const passphrase = document.getElementById('passphrase').value || '';
-        if(window.recoverFromAES) {
+        if(window.recoverFromAEStoString) {
             
-             const result = window.recoverFromAES(passphrase, document.getElementById('mnemonic').value);
+             const result = window.recoverFromAEStoString(passphrase, document.getElementById('mnemonic').value);
             // console.log('generateShares result:', result);
 
             try {
@@ -151,8 +151,8 @@ function setupEventListeners() {
     
     document.getElementById('recoverPrivate').addEventListener('click', async () => {
         const passphrase = document.getElementById('passphrase').value || '';
-        if(window.recoverFromAES) {
-             const result = window.recoverFromAES(passphrase, document.getElementById('privatekey').value);
+        if(window.recoverFromAEStoHex) {
+             const result = window.recoverFromAEStoHex(passphrase, document.getElementById('privatekey').value);
             // console.log('generateShares result:', result);
 
             try {
@@ -200,8 +200,8 @@ function setupEventListeners() {
                     // Trigger recover button click programmatically
                     document.getElementById('recoverBtn').click();
 
-                    // document.getElementById('recoverMnemonic').click();
-                    // document.getElementById('recoverPrivate').click();
+                    document.getElementById('recoverMnemonic').click();
+                    document.getElementById('recoverPrivate').click();
                 }
                     
             }

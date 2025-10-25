@@ -30,16 +30,52 @@ import (
 type ShareGroup [][]string
 
 func main() {
+
+	// js.Global().Set("recoverFromAES", js.FuncOf(jsRecoverFromAES))
+
+	// hex := "2fa045d02ae3651af96b4256d0e423076b39f9ad6475ed2a45c89c18867cb898e632de1fc88ba338e80510bef2fa9d9cc7136985993adfd7caa5acdf65205870880107fcc4629887161958261c397c640e9ddeb37d1b8e0645b3c7c774056fdb5c666a4a049df7df900cb46e4e3321074284fd9db70ac1895a3df760aeeaa866ddb1b4d435da30e792cfcabaf71ea4920dcd7d6bd97b594febc4023d0028bc4418d9909b0b4a4bf9880969b4b729ddb30055d508254954d183026faf39bc"
+	// pass := "123456"
+
+	// // Create js.Value slice for arguments
+	// args := []js.Value{
+	// 	js.ValueOf(pass),
+	// 	js.ValueOf(hex),
+	// }
+	// jsFunc := js.Global().Get("jsRecoverFromAES")
+
+	// anyArgs := make([]any, len(args))
+	// for i, v := range args {
+	// 	anyArgs[i] = v
+	// }
+
+	// result := jsFunc.Invoke(anyArgs...)
+	// fmt.Print(result)
+
 	c := make(chan struct{})
 
-	js.Global().Set("generateShares", js.FuncOf(jsGenerateShares))
-	js.Global().Set("recoverShares", js.FuncOf(jsRecoverShares))
-	js.Global().Set("generateQRCode", js.FuncOf(jsGenerateQRCode))
-	js.Global().Set("decodeQrFromImage", js.FuncOf(decodeQrFromImage))
-	js.Global().Set("reEncryptShares", js.FuncOf(jsReEncryptShares))
-	js.Global().Set("recoverFromAES", js.FuncOf(jsRecoverFromAES))
+	js.Global().Set("generateShares", js.FuncOf(panicSafe(jsGenerateShares)))
+	js.Global().Set("recoverShares", js.FuncOf(panicSafe(jsRecoverShares)))
+	js.Global().Set("generateQRCode", js.FuncOf(panicSafe(jsGenerateQRCode)))
+	js.Global().Set("decodeQrFromImage", js.FuncOf(panicSafe(decodeQrFromImage)))
+	js.Global().Set("reEncryptShares", js.FuncOf(panicSafe(jsReEncryptShares)))
+	js.Global().Set("recoverFromAEStoString", js.FuncOf(panicSafe(jsRecoverFromAEStoString)))
+	js.Global().Set("recoverFromAEStoHex", js.FuncOf(panicSafe(jsRecoverFromAEStoHex)))
 
 	<-c // keep running
+}
+
+// panicSafe wraps a js.FuncOf callback to catch panics
+func panicSafe(f func(js.Value, []js.Value) interface{}) func(js.Value, []js.Value) interface{} {
+	return func(this js.Value, args []js.Value) (result interface{}) {
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Println("Recovered panic:", r)
+				// Return a JS error object if desired
+				result = js.Global().Get("Error").New(fmt.Sprintf("%v", r))
+			}
+		}()
+		return f(this, args)
+	}
 }
 
 func jsGenerateQRCode(this js.Value, args []js.Value) any {
@@ -321,24 +357,56 @@ func decrypt(password []byte, hexCipher string) ([]byte, error) {
 	return plaintext, nil
 }
 
-func jsRecoverFromAES(this js.Value, args []js.Value) any {
+func jsRecoverFromAEStoString(this js.Value, args []js.Value) any {
+	if len(args) < 2 {
+		return map[string]any{"error": "expected passphrase and encryptedHexString"}
+	}
 
 	passphrase := strings.TrimSpace(args[0].String())
 	encryptedHexString := args[1].String()
 
-	var pass []byte
 	if passphrase == "" {
 		return map[string]any{"error": "input passphrase is empty"}
 	}
+
+	var pass []byte
 	if passphrase != "" {
 		pass = []byte(passphrase)
+	} else {
+		pass = nil
 	}
 
-	enc_mnemonic, err := decrypt(pass, encryptedHexString)
-
+	result, err := decrypt(pass, encryptedHexString)
 	if err != nil {
 		return map[string]any{"error": err.Error()}
 	}
 
-	return map[string]any{"decrypted": enc_mnemonic}
+	return map[string]any{"decrypted": string(result)}
+}
+
+func jsRecoverFromAEStoHex(this js.Value, args []js.Value) any {
+	if len(args) < 2 {
+		return map[string]any{"error": "expected passphrase and encryptedHexString"}
+	}
+
+	passphrase := strings.TrimSpace(args[0].String())
+	encryptedHexString := args[1].String()
+
+	if passphrase == "" {
+		return map[string]any{"error": "input passphrase is empty"}
+	}
+
+	var pass []byte
+	if passphrase != "" {
+		pass = []byte(passphrase)
+	} else {
+		pass = nil
+	}
+
+	result, err := decrypt(pass, encryptedHexString)
+	if err != nil {
+		return map[string]any{"error": err.Error()}
+	}
+
+	return map[string]any{"decrypted": hex.EncodeToString(result)}
 }

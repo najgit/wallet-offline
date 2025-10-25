@@ -286,20 +286,60 @@ function setupEventListeners() {
     
     document.getElementById('recoverPrivate').addEventListener('click', async () => {
         const passphrase = document.getElementById('passphrase').value || '';
+        const re_passphrase = document.getElementById('repassphrase').value || '';
+
+        const outputEl = document.getElementById('recoverResult');
+        const secureEl = document.getElementById('secureResult');
+
+        const mnemonicRecover = document.getElementById('mnemonicRecover');
+        const keyRecover = document.getElementById('keyRecover');
+        
+        const mnemonicReEncrypt = document.getElementById('mnemonicReEncrypt');
+        const keyReEncrypt = document.getElementById('keyReEncrypt');
+
+        outputEl.innerHTML  ='';
+        secureEl.innerHTML = ''; // Clear previous
+        keyReEncrypt.innerHTML = '';
+        mnemonicRecover.innerHTML = '';
+        keyRecover.innerHTML = '';
+        mnemonicReEncrypt.innerHTML = '';
+
         if(window.recoverFromAEStoHex) {
             document.getElementById('keyRecover').value='';
             // console.log('generateShares result:', result);
 
             try {
-                const result = window.recoverFromAEStoHex(passphrase, document.getElementById('privatekey').value);
+                const result = window.recoverFromAEStoHex(passphrase, document.getElementById('privatekey').value, re_passphrase);
                 const obj = typeof result === 'string' ? JSON.parse(result) : result;
+
                 if (obj.decrypted) {
-                    document.getElementById('keyRecover').textContent ="recovered private key: "+ obj.decrypted;
+                    // mnemonicRecover.textContent = "recovered mnemonic: "+ obj.decrypted;
+                    keyRecover.textContent = "recovered private: "+ obj.decrypted;
+
+                    const newSharesGroups = JSON.parse(obj.shares);
+                    await displaySharesWithQR(newSharesGroups, outputEl);
+                }
+                
+                if (re_passphrase != ''){ 
+
+                    if (obj.error) {
+                        outputEl.textContent = `Error: ${obj.error}`;
+                        return;
+                    }
+                    
+                    // Display re-encrypted shares just like recovered shares
+                    // displayQR(obj.encMnemonic, "Mnemonic: "+obj.encMnemonic, mnemonicReEncrypt)
+                    displayQR(obj.encMasterKeyHex, "Private: "+obj.encMasterKeyHex, keyReEncrypt)
+
+                    const newSharesGroups = JSON.parse(obj.encShares);
+                    await displaySharesWithQR(newSharesGroups, secureEl);
+
                 }
             
             } catch (e) {
                 document.getElementById('keyRecover').textContent = String(result);
             }
+            
         }
     });
 

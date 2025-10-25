@@ -471,15 +471,17 @@ func jsRecoverFromAEStoString(this js.Value, args []js.Value) any {
 }
 
 func jsRecoverFromAEStoHex(this js.Value, args []js.Value) any {
-	if len(args) < 2 {
-		return map[string]any{"error": "expected passphrase and encryptedHexString"}
+	if len(args) < 3 {
+		return map[string]any{"error": "expected passphrase, re-encrypt passphrase (if exist) and 24 words Mnemonic"}
 	}
 
 	passphrase := strings.TrimSpace(args[0].String())
-	encryptedHexString := args[1].String()
+	masterSecretHex := args[1].String()
 
-	if passphrase == "" {
-		return map[string]any{"error": "input passphrase is empty"}
+	// password for re_encrypt if provide
+	re_passphrase := ""
+	if len(args) > 2 {
+		re_passphrase = args[2].String()
 	}
 
 	var pass []byte
@@ -489,10 +491,74 @@ func jsRecoverFromAEStoHex(this js.Value, args []js.Value) any {
 		pass = nil
 	}
 
-	result, err := decrypt(pass, encryptedHexString)
+	var passre []byte
+	if re_passphrase != "" {
+		passre = []byte(re_passphrase)
+	} else {
+		passre = nil
+	}
+
+	// var masterSecretHex = strings.TrimSpace(masterSecret)
+	var err error
+	var masterSecret []byte
+
+	// decrypt 24 passphrase first
+	if passphrase != "" {
+		masterSecret, err = decrypt(pass, strings.TrimSpace(masterSecretHex))
+		if err != nil {
+			return map[string]any{"error": err.Error()}
+		}
+	} else {
+		masterSecret = []byte(strings.TrimSpace(masterSecretHex))
+	}
+
+	groups, err := slip39.GenerateMnemonicsWithPassphrase(
+		1,
+		[]slip39.MemberGroupParameters{{MemberThreshold: 3, MemberCount: 5}},
+		masterSecret,
+		nil, // create original no decrypt share
+	)
+
 	if err != nil {
 		return map[string]any{"error": err.Error()}
 	}
 
-	return map[string]any{"decrypted": hex.EncodeToString(result)}
+	var re_encrypt_groups slip39.ShareGroups
+	// gen encrypted share
+	if re_passphrase != "" {
+
+		groups_re, err := slip39.GenerateMnemonicsWithPassphrase(
+			1,
+			[]slip39.MemberGroupParameters{{MemberThreshold: 3, MemberCount: 5}},
+			masterSecret,
+			passre, // create original no decrypt share
+		)
+
+		if err != nil {
+			return map[string]any{"error": err.Error()}
+		}
+		re_encrypt_groups = groups_re
+	}
+
+	var enc_masterKeyHex string
+	var errenc error
+
+	masterkeyHex := hex.EncodeToString(masterSecret)
+	if re_passphrase != "" {
+		enc_masterKeyHex, errenc = encrypt(passre, masterSecret)
+
+		if errenc != nil {
+			return map[string]any{"error": errenc.Error()}
+		}
+	}
+
+	sharesJSON, _ := json.Marshal(groups)
+	sharesJSONEncrypt, _ := json.Marshal(re_encrypt_groups)
+	return map[string]any{
+		"decrypted":       masterkeyHex,
+		"encMasterKeyHex": enc_masterKeyHex,
+		"shares":          string(sharesJSON),
+		"encShares":       string(sharesJSONEncrypt),
+	}
+	// return map[string]any{"decrypted": hex.EncodeToString(result)}
 }

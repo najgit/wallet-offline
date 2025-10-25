@@ -37,6 +37,7 @@ func main() {
 	js.Global().Set("generateQRCode", js.FuncOf(jsGenerateQRCode))
 	js.Global().Set("decodeQrFromImage", js.FuncOf(decodeQrFromImage))
 	js.Global().Set("reEncryptShares", js.FuncOf(jsReEncryptShares))
+	js.Global().Set("recoverFromAES", js.FuncOf(jsRecoverFromAES))
 
 	<-c // keep running
 }
@@ -94,13 +95,13 @@ func jsGenerateShares(this js.Value, args []js.Value) any {
 
 	masterkeyHex := hex.EncodeToString(masterSecret)
 	if passphrase != "" {
-		enc_mnemonic, errenc = Encrypt(pass, []byte(mnemonic))
+		enc_mnemonic, errenc = encrypt(pass, []byte(mnemonic))
 
 		if errenc != nil {
 			return map[string]any{"error": errenc.Error()}
 		}
 
-		enc_masterKeyHex, errenc = Encrypt(pass, masterSecret)
+		enc_masterKeyHex, errenc = encrypt(pass, masterSecret)
 
 		if errenc != nil {
 			return map[string]any{"error": errenc.Error()}
@@ -240,11 +241,11 @@ func DeriveKeyArgon2id(password, salt []byte) []byte {
 }
 
 // ===============================
-// Encryption Function
+// encryption Function
 // ===============================
-// Encrypts plaintext with AES-256-GCM derived from password using Argon2id.
+// encrypts plaintext with AES-256-GCM derived from password using Argon2id.
 // Returns hex string encoding [salt || nonce || ciphertext].
-func Encrypt(password []byte, plaintext []byte) (string, error) {
+func encrypt(password []byte, plaintext []byte) (string, error) {
 	// Generate random 16-byte salt
 	salt := make([]byte, 16)
 	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
@@ -283,10 +284,10 @@ func Encrypt(password []byte, plaintext []byte) (string, error) {
 }
 
 // ===============================
-// Decryption Function
+// decryption Function
 // ===============================
-// Decrypts hex-encoded [salt || nonce || ciphertext] using Argon2id-derived key.
-func Decrypt(password []byte, hexCipher string) ([]byte, error) {
+// decrypts hex-encoded [salt || nonce || ciphertext] using Argon2id-derived key.
+func decrypt(password []byte, hexCipher string) ([]byte, error) {
 	data, err := hex.DecodeString(hexCipher)
 	if err != nil {
 		return nil, fmt.Errorf("invalid hex input: %w", err)
@@ -318,4 +319,26 @@ func Decrypt(password []byte, hexCipher string) ([]byte, error) {
 	}
 
 	return plaintext, nil
+}
+
+func jsRecoverFromAES(this js.Value, args []js.Value) any {
+
+	passphrase := strings.TrimSpace(args[0].String())
+	encryptedHexString := args[1].String()
+
+	var pass []byte
+	if passphrase == "" {
+		return map[string]any{"error": "input passphrase is empty"}
+	}
+	if passphrase != "" {
+		pass = []byte(passphrase)
+	}
+
+	enc_mnemonic, err := decrypt(pass, encryptedHexString)
+
+	if err != nil {
+		return map[string]any{"error": err.Error()}
+	}
+
+	return map[string]any{"decrypted": enc_mnemonic}
 }

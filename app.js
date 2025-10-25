@@ -131,11 +131,38 @@ async function displaySharesWithQR(sharesGroups, outputEl) {
 function setupEventListeners() {
 
     document.getElementById('recoverMnemonic').addEventListener('click', async () => {
-        alert('click')
+        if(window.recoverFromAES) {
+            
+             const result = window.recoverFromAES( document.getElementById('mnemonic').value);
+            // console.log('generateShares result:', result);
+
+            try {
+                const obj = typeof result === 'string' ? JSON.parse(result) : result;
+                if (obj.data) {
+                    document.getElementById('mnemonicRecover').textContent = "recovered mnemonic: "+ obj.data;
+                }
+            
+            } catch (e) {
+                document.getElementById('mnemonicRecover').textContent = String(result);
+            }
+        }
     });
     
     document.getElementById('recoverPrivate').addEventListener('click', async () => {
-        alert('click recoverPrivate')
+        if(window.recoverFromAES) {
+             const result = window.recoverFromAES(document.getElementById('privatekey').value);
+            // console.log('generateShares result:', result);
+
+            try {
+                const obj = typeof result === 'string' ? JSON.parse(result) : result;
+                if (obj.data) {
+                    document.getElementById('keyRecover').textContent ="recovered private key: "+ obj.data;
+                }
+            
+            } catch (e) {
+                document.getElementById('keyRecover').textContent = String(result);
+            }
+        }
     });
   document.getElementById('genBtn').addEventListener('click', async () => {
     const passphrase = document.getElementById('passphrase').value || '';
@@ -144,46 +171,46 @@ function setupEventListeners() {
         // console.log('generateShares result:', result);
 
         try {
-        const obj = typeof result === 'string' ? JSON.parse(result) : result;
-        if (obj.shares) {
-            const sharesGroups = JSON.parse(obj.shares);
-            outputDisplay =document.getElementById('genResult');
-            mnemonicDisplay =document.getElementById('mnemonicResult');
-            keyDisplay =document.getElementById('keyResult');
-            outputDisplay.innerHTML = '';
-            mnemonicDisplay.innerHTML = '';
-            keyDisplay.innerHTML = '';
-            await displaySharesWithQR(sharesGroups, outputDisplay);
+            const obj = typeof result === 'string' ? JSON.parse(result) : result;
+            if (obj.shares) {
+                const sharesGroups = JSON.parse(obj.shares);
+                outputDisplay =document.getElementById('genResult');
+                mnemonicDisplay =document.getElementById('mnemonicResult');
+                keyDisplay =document.getElementById('keyResult');
+                outputDisplay.innerHTML = '';
+                mnemonicDisplay.innerHTML = '';
+                keyDisplay.innerHTML = '';
+                await displaySharesWithQR(sharesGroups, outputDisplay);
 
-            displayQR(obj.encMnemonic, obj.encMnemonic, mnemonicDisplay)
-            displayQR(obj.encMasterKeyHex, obj.encMasterKeyHex, keyDisplay)
+                displayQR(obj.encMnemonic, obj.encMnemonic, mnemonicDisplay)
+                displayQR(obj.encMasterKeyHex, obj.encMasterKeyHex, keyDisplay)
 
-            // --- New: populate share1,2,3 and trigger recover ---
-            if ( passphrase!= "" && sharesGroups[0] && sharesGroups[0].length >= 3) {
-                console.log("trigger recover botton....")
-                document.getElementById('share1').value = sharesGroups[0][0];
-                document.getElementById('share2').value = sharesGroups[0][1];
-                document.getElementById('share3').value = sharesGroups[0][2];
+                // --- New: populate share1,2,3 and trigger recover ---
+                if ( passphrase!= "" && sharesGroups[0] && sharesGroups[0].length >= 3) {
+                    console.log("trigger recover botton....")
+                    document.getElementById('share1').value = sharesGroups[0][0];
+                    document.getElementById('share2').value = sharesGroups[0][1];
+                    document.getElementById('share3').value = sharesGroups[0][2];
 
-                document.getElementById('mnemonic').value =  obj.encMnemonic
-                document.getElementById('privatekey').value = obj.encMasterKeyHex
+                    document.getElementById('mnemonic').value =  obj.encMnemonic
+                    document.getElementById('privatekey').value = obj.encMasterKeyHex
 
-                // Trigger recover button click programmatically
-                document.getElementById('recoverBtn').click();
+                    // Trigger recover button click programmatically
+                    document.getElementById('recoverBtn').click();
 
-                document.getElementById('recoverMnemonic').click();
-                document.getElementById('recoverPrivate').click();
+                    document.getElementById('recoverMnemonic').click();
+                    document.getElementById('recoverPrivate').click();
+                }
+                    
             }
-                
-        }
-        
+            
 
-        // Also display mnemonic and masterKeyHex normally
-        const outputEl = document.getElementById('genResult');
-        outputEl.insertAdjacentHTML('afterbegin',
-            `<div><strong>Mnemonic:</strong> ${obj.mnemonic}</div>` +
-            `<div><strong>Master Key (hex):</strong> ${obj.masterKeyHex}</div>`
-        );
+            // Also display mnemonic and masterKeyHex normally
+            const outputEl = document.getElementById('genResult');
+            outputEl.insertAdjacentHTML('afterbegin',
+                `<div><strong>Mnemonic:</strong> ${obj.mnemonic}</div>` +
+                `<div><strong>Master Key (hex):</strong> ${obj.masterKeyHex}</div>`
+            );
         
         } catch (e) {
             document.getElementById('genResult').textContent = String(result);

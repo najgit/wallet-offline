@@ -144,14 +144,14 @@ function setupEventListeners() {
 
     document.getElementById('updateApp').addEventListener('click', async () => {
         try {
-             const confirmed = confirm(
-                "Internet connection require to update the latest version.\n\nDo you want to continue?"
-            );
+            //  const confirmed = confirm(
+            //     "Internet connection require to update the latest version.\n\nDo you want to continue?"
+            // );
 
-            if (!confirmed) {
-                console.log("Update canceled by user.");
-                return; // User clicked Cancel
-            }
+            // if (!confirmed) {
+            //     console.log("Update canceled by user.");
+            //     return; // User clicked Cancel
+            // }
 
              // Step 1: Check network connectivity
             const online = await checkInternetConnection();
@@ -178,7 +178,9 @@ function setupEventListeners() {
             }
 
             // Reload page to load latest version
-            location.reload();
+            // location.reload();
+            window.location.href = window.location.origin + window.location.pathname;
+
         } catch (err) {
             console.error('Error updating app:', err);
             alert('Failed to update app.');
@@ -189,11 +191,11 @@ function setupEventListeners() {
     document.getElementById('recoverMnemonic').addEventListener('click', async () => {
         const passphrase = document.getElementById('passphrase').value || '';
         if(window.recoverFromAEStoString) {
-            document.getElementById('mnemonic').value = ''
-             const result = window.recoverFromAEStoString(passphrase, document.getElementById('mnemonic').value);
+            document.getElementById('mnemonicRecover').value = '';
             // console.log('generateShares result:', result);
 
             try {
+                const result = window.recoverFromAEStoString(passphrase, document.getElementById('mnemonic').value);
                 const obj = typeof result === 'string' ? JSON.parse(result) : result;
                 if (obj.decrypted) {
                     document.getElementById('mnemonicRecover').textContent = "recovered mnemonic: "+ obj.decrypted;
@@ -208,11 +210,11 @@ function setupEventListeners() {
     document.getElementById('recoverPrivate').addEventListener('click', async () => {
         const passphrase = document.getElementById('passphrase').value || '';
         if(window.recoverFromAEStoHex) {
-            document.getElementById('privatekey').value=''
-             const result = window.recoverFromAEStoHex(passphrase, document.getElementById('privatekey').value);
+            document.getElementById('keyRecover').value='';
             // console.log('generateShares result:', result);
 
             try {
+                const result = window.recoverFromAEStoHex(passphrase, document.getElementById('privatekey').value);
                 const obj = typeof result === 'string' ? JSON.parse(result) : result;
                 if (obj.decrypted) {
                     document.getElementById('keyRecover').textContent ="recovered private key: "+ obj.decrypted;
@@ -304,6 +306,7 @@ document.getElementById('recoverBtn').addEventListener('click', async () => {
     const secureEl = document.getElementById('secureResult');
     const keyReEncrypt = document.getElementById('keyReEncrypt');
     secureEl.innerHTML = ''; // Clear previous
+    keyReEncrypt.innerHTML = '';
 
     const obj = typeof result === 'string' ? JSON.parse(result) : result;
 

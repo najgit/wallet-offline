@@ -310,9 +310,9 @@ async function tick(video, output) {
 
             const decodedStr = result.text;
             //   console.log('Decoded string:', decodedStr);
-            alert(decodedStr);
-            if (output != 'undefined') {
-                alert(output);
+            // alert(decodedStr);
+            if (output !== undefined) {
+                // alert(output);
                 output.value = decodedStr;
                 return;
             }

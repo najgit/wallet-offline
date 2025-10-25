@@ -178,8 +178,8 @@ function setupEventListeners() {
             }
 
             // Reload page to load latest version
-            // location.reload();
-            window.location.href = window.location.origin + window.location.pathname;
+            location.reload();
+            // window.location.href = window.location.origin + window.location.pathname;
 
         } catch (err) {
             console.error('Error updating app:', err);

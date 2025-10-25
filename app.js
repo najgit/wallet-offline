@@ -277,14 +277,15 @@ function startQrScan(video, output) {
       video.srcObject = stream;
       video.setAttribute("playsinline", true); // required for iOS
       video.play();
-      requestAnimationFrame(tick);
+    //   requestAnimationFrame(tick);
+      requestAnimationFrame(() => tick(video, output));
     })
     .catch(err => {
       alert('Error accessing camera: ' + err);
     });
 }
 
-async function tick() {
+async function tick(video, output) {
   if (video.readyState === video.HAVE_ENOUGH_DATA) {
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth;
@@ -332,7 +333,7 @@ async function tick() {
       console.error('Go QR decode error:', e);
     }
   }
-  requestAnimationFrame(tick);
+  requestAnimationFrame(() => tick(video, output));
 }
 
 

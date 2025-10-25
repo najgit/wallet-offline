@@ -408,6 +408,23 @@ function setupEventListeners() {
 document.getElementById('recoverBtn').addEventListener('click', async () => {
   const passphrase = document.getElementById('passphrase').value || '';
   const re_passphrase = document.getElementById('repassphrase').value || '';
+
+    const outputEl = document.getElementById('recoverResult');
+    const secureEl = document.getElementById('secureResult');
+
+    const mnemonicRecover = document.getElementById('mnemonicRecover');
+    const keyRecover = document.getElementById('keyRecover');
+    
+    const mnemonicReEncrypt = document.getElementById('mnemonicReEncrypt');
+    const keyReEncrypt = document.getElementById('keyReEncrypt');
+
+    outputEl.innerHTML  ='';
+    secureEl.innerHTML = ''; // Clear previous
+    keyReEncrypt.innerHTML = '';
+    mnemonicRecover.innerHTML = '';
+    keyRecover.innerHTML = '';
+    mnemonicReEncrypt.innerHTML = '';
+    
   const shares = [
     document.getElementById('share1').value.trim(),
     document.getElementById('share2').value.trim(),
@@ -427,12 +444,6 @@ document.getElementById('recoverBtn').addEventListener('click', async () => {
   try {
     const sharesGroups = [shares];
     const result = window.recoverShares(passphrase, JSON.stringify(sharesGroups));
-    const outputEl = document.getElementById('recoverResult');
-    const secureEl = document.getElementById('secureResult');
-    const keyReEncrypt = document.getElementById('keyReEncrypt');
-    secureEl.innerHTML = ''; // Clear previous
-    keyReEncrypt.innerHTML = '';
-
     const obj = typeof result === 'string' ? JSON.parse(result) : result;
 
     if (obj.error) {
@@ -441,7 +452,8 @@ document.getElementById('recoverBtn').addEventListener('click', async () => {
     }
 
     // Show recovered private key
-    outputEl.innerHTML = `<div><strong>Recovered Private Key (hex):</strong> ${obj.recoveredHex}</div>`;
+    // outputEl.innerHTML = `<div><strong>Recovered Private Key (hex):</strong> ${obj.recoveredHex}</div>`;
+    displayQR(obj.recoveredHex,"recovered private: <div style='width: 100%'"+ obj.recoveredHex, keyRecover)
 
     // Display regenerated shares
     if (obj.newShares) {

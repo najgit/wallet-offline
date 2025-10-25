@@ -127,8 +127,64 @@ async function displaySharesWithQR(sharesGroups, outputEl) {
   }
 }
 
+async function checkInternetConnection() {
+    if (!navigator.onLine) return false;
+
+    try {
+        // Try fetching a small, fast resource
+        const response = await fetch(window.location.origin, { method: 'HEAD', cache: 'no-store' });
+        return response.ok;
+    } catch {
+        return false;
+    }
+}
+
 
 function setupEventListeners() {
+
+    document.getElementById('updateApp').addEventListener('click', async () => {
+        try {
+             const confirmed = confirm(
+                "Internet connection require to update the latest version.\n\nDo you want to continue?"
+            );
+
+            if (!confirmed) {
+                console.log("Update canceled by user.");
+                return; // User clicked Cancel
+            }
+
+             // Step 1: Check network connectivity
+            const online = await checkInternetConnection();
+            if (!online) {
+                alert("No internet connection detected. Please connect to the internet before updating.");
+                return;
+            }
+            
+            // Unregister service workers (optional)
+            if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                for (const reg of regs) await reg.unregister();
+            }
+
+            // Clear only the specific cache
+            if ('caches' in window) {
+                const cacheName = "wallet-pwa-v4";
+                const deleted = await caches.delete(cacheName);
+                if (deleted) {
+                    console.log(`Cache "${cacheName}" cleared.`);
+                } else {
+                    console.log(`Cache "${cacheName}" not found.`);
+                }
+            }
+
+            // Reload page to load latest version
+            location.reload();
+        } catch (err) {
+            console.error('Error updating app:', err);
+            alert('Failed to update app.');
+        }
+    });
+
 
     document.getElementById('recoverMnemonic').addEventListener('click', async () => {
         const passphrase = document.getElementById('passphrase').value || '';

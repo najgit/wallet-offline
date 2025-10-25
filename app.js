@@ -254,8 +254,11 @@ function setupEventListeners() {
                 const obj = typeof result === 'string' ? JSON.parse(result) : result;
 
                 if (obj.decrypted) {
-                    mnemonicRecover.textContent = "recovered mnemonic: "+ obj.decrypted;
-                    keyRecover.textContent = "recovered private: "+ obj.masterKeyHex;
+                    // mnemonicRecover.textContent = "recovered mnemonic: "+ obj.decrypted;
+                    // keyRecover.textContent = "recovered private: "+ obj.masterKeyHex;
+                    
+                    displayQR(obj.decrypted, "recovered mnemonic: "+obj.decrypted, mnemonicRecover)
+                    displayQR(obj.masterKeyHex, "recovered Private: "+obj.masterKeyHex, keyRecover)
 
                     const newSharesGroups = JSON.parse(obj.shares);
                     await displaySharesWithQR(newSharesGroups, outputEl);
@@ -314,7 +317,9 @@ function setupEventListeners() {
 
                 if (obj.decrypted) {
                     // mnemonicRecover.textContent = "recovered mnemonic: "+ obj.decrypted;
-                    keyRecover.textContent = "recovered private: "+ obj.decrypted;
+                    // keyRecover.textContent = "recovered private: "+ obj.decrypted;
+                    
+                    displayQR(obj.decrypted, "recovered Private: "+obj.decrypted, keyRecover)
 
                     const newSharesGroups = JSON.parse(obj.shares);
                     await displaySharesWithQR(newSharesGroups, outputEl);

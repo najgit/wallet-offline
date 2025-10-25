@@ -481,7 +481,7 @@ func jsRecoverFromAEStoHex(this js.Value, args []js.Value) any {
 	// password for re_encrypt if provide
 	re_passphrase := ""
 	if len(args) > 2 {
-		re_passphrase = args[2].String()
+		re_passphrase = strings.TrimSpace(args[2].String())
 	}
 
 	var pass []byte

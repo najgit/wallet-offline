@@ -8,14 +8,50 @@
   <link rel="manifest" href="manifest.json" />
   <script src="wasm_exec.js"></script>
   <script src="app.js"></script>
+
+  <style>
+  .pass-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .pass-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding-right: 40px; /* space for the eye button */
+  }
+
+  .toggle-visibility {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    font-size: 18px;
+  }
+
+  .toggle-visibility:focus {
+    outline: none;
+  }
+</style>
+
 </head>
 <body>
   <h1>VERSION 1.1.1</h1>
   <button id="updateApp">Update App</button>
   <h1>SLIP39 PWA</h1>
-<input id="passphrase" placeholder="Enter passphrase" style="width: 100%; box-sizing: border-box;" />
+<input id="passphrase" 
+        autocapitalize="off"
+        spellcheck="false"
+        inputmode="text" placeholder="Enter passphrase" style="width: 100%; box-sizing: border-box;" />
 <br/><br/>
-<input id="repassphrase" placeholder="Enter new passphrase for re-encrypted" style="width: 100%; box-sizing: border-box;" />
+<input id="repassphrase"  
+        autocapitalize="off"
+        spellcheck="false"
+        inputmode="text" placeholder="Enter new passphrase for re-encrypted" style="width: 100%; box-sizing: border-box;" />
 <br/><br/>
 <button id="genBtn">Generate Shares</button>
 <pre id="mnemonicResult"></pre>

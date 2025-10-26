@@ -253,6 +253,11 @@ function setupEventListeners() {
                 const result = window.recoverFromAEStoString(passphrase, document.getElementById('mnemonic').value, re_passphrase);
                 const obj = typeof result === 'string' ? JSON.parse(result) : result;
 
+                if (obj.error) {
+                    outputEl.textContent = `Error: ${obj.error}`;
+                    return;
+                }
+
                 if (obj.decrypted) {
                     // mnemonicRecover.textContent = "recovered mnemonic: "+ obj.decrypted;
                     // keyRecover.textContent = "recovered private: "+ obj.masterKeyHex;

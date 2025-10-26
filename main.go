@@ -22,6 +22,7 @@ import (
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
 	skip2qrcode "github.com/skip2/go-qrcode"
+	"github.com/tyler-smith/go-bip32"
 	"github.com/tyler-smith/go-bip39"
 	"golang.org/x/crypto/argon2"
 )
@@ -407,13 +408,14 @@ func jsRecoverFromAEStoString(this js.Value, args []js.Value) any {
 		mnemonic = string(mnemonic_bytes)
 	}
 
-	// seed := bip39.NewSeed(mnemonic, "")
-	// masterKey, _ := bip32.NewMasterKey(seed)
-	// masterSecret := masterKey.Key
-	masterSecret, err := bip39.MnemonicToByteArray(mnemonic)
-	if err != nil {
-		return map[string]any{"error": err.Error()}
-	}
+	seed := bip39.NewSeed(mnemonic, "")
+	masterKey, _ := bip32.NewMasterKey(seed)
+	masterSecret := masterKey.Key
+
+	// masterSecret, err := bip39.MnemonicToByteArray(mnemonic)
+	// if err != nil {
+	// 	return map[string]any{"error": err.Error()}
+	// }
 
 	groups, err := slip39.GenerateMnemonicsWithPassphrase(
 		1,

@@ -22,6 +22,7 @@ import (
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
 	skip2qrcode "github.com/skip2/go-qrcode"
+	"github.com/tyler-smith/go-bip32"
 	"github.com/tyler-smith/go-bip39"
 	"golang.org/x/crypto/argon2"
 )
@@ -110,10 +111,9 @@ func jsGenerateShares(this js.Value, args []js.Value) any {
 	// Generate BIP39 seed -> BIP32 master key
 	entropy, _ := bip39.NewEntropy(256)
 	mnemonic, _ := bip39.NewMnemonic(entropy)
-	// seed := bip39.NewSeed(mnemonic, "")
-	// masterKey, _ := bip32.NewMasterKey(seed)
-	// masterSecret := masterKey.Key
-	masterSecret := entropy
+	seed := bip39.NewSeed(mnemonic, "")
+	masterKey, _ := bip32.NewMasterKey(seed)
+	masterSecret := masterKey.Key
 
 	groups, err := slip39.GenerateMnemonicsWithPassphrase(
 		1,
@@ -412,17 +412,20 @@ func jsRecoverFromAEStoString(this js.Value, args []js.Value) any {
 		return map[string]any{"error": "invalid mnemonic"}
 	}
 
-	// seed := bip39.NewSeed(mnemonic, "")
-	// masterKey, _ := bip32.NewMasterKey(seed)
-	// masterSecret := masterKey.Key
-	masterSecret, err := bip39.MnemonicToByteArray(mnemonic)
-	if err != nil {
-		return map[string]any{"error": err.Error()}
-	}
+	seed := bip39.NewSeed(mnemonic, "")
+	masterKey, _ := bip32.NewMasterKey(seed)
+	masterSecret := masterKey.Key
 
-	if len(masterSecret)%2 != 0 {
-		masterSecret = masterSecret[:len(masterSecret)-1] // trim last byte if odd length
-	}
+	// TODO: TEST this way
+	// masterSecret, err := bip39.MnemonicToByteArray(mnemonic)
+	// if err != nil {
+	// 	return map[string]any{"error": err.Error()}
+	// }
+
+	// // Ensure secret length is even and within SLIP-39 valid range
+	// if len(masterSecret)%2 != 0 {
+	// 	masterSecret = masterSecret[:len(masterSecret)-1] // trim last byte if odd length
+	// }
 
 	groups, err := slip39.GenerateMnemonicsWithPassphrase(
 		1,

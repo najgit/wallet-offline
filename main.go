@@ -407,6 +407,11 @@ func jsRecoverFromAEStoString(this js.Value, args []js.Value) any {
 		mnemonic = string(mnemonic_bytes)
 	}
 
+	// 1) Validate mnemonic
+	if !bip39.IsMnemonicValid(mnemonic) {
+		return map[string]any{"error": "invalid mnemonic"}
+	}
+
 	// seed := bip39.NewSeed(mnemonic, "")
 	// masterKey, _ := bip32.NewMasterKey(seed)
 	// masterSecret := masterKey.Key

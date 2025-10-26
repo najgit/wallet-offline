@@ -22,7 +22,6 @@ import (
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
 	skip2qrcode "github.com/skip2/go-qrcode"
-	"github.com/tyler-smith/go-bip32"
 	"github.com/tyler-smith/go-bip39"
 	"golang.org/x/crypto/argon2"
 )
@@ -111,9 +110,10 @@ func jsGenerateShares(this js.Value, args []js.Value) any {
 	// Generate BIP39 seed -> BIP32 master key
 	entropy, _ := bip39.NewEntropy(256)
 	mnemonic, _ := bip39.NewMnemonic(entropy)
-	seed := bip39.NewSeed(mnemonic, "")
-	masterKey, _ := bip32.NewMasterKey(seed)
-	masterSecret := append(masterKey.Key, masterKey.ChainCode...)
+	// seed := bip39.NewSeed(mnemonic, "")
+	// masterKey, _ := bip32.NewMasterKey(seed)
+	// masterSecret := masterKey.Key
+	masterSecret := entropy
 
 	groups, err := slip39.GenerateMnemonicsWithPassphrase(
 		1,
@@ -407,9 +407,10 @@ func jsRecoverFromAEStoString(this js.Value, args []js.Value) any {
 		mnemonic = string(mnemonic_bytes)
 	}
 
-	seed := bip39.NewSeed(mnemonic, "")
-	masterKey, _ := bip32.NewMasterKey(seed)
-	masterSecret := append(masterKey.Key, masterKey.ChainCode...)
+	// seed := bip39.NewSeed(mnemonic, "")
+	// masterKey, _ := bip32.NewMasterKey(seed)
+	// masterSecret := masterKey.Key
+	masterSecret, _ := bip39.MnemonicToByteArray(mnemonic)
 
 	groups, err := slip39.GenerateMnemonicsWithPassphrase(
 		1,

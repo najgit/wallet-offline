@@ -113,7 +113,7 @@ func jsGenerateShares(this js.Value, args []js.Value) any {
 	mnemonic, _ := bip39.NewMnemonic(entropy)
 	seed := bip39.NewSeed(mnemonic, "")
 	masterKey, _ := bip32.NewMasterKey(seed)
-	masterSecret := masterKey.Key
+	masterSecret := append(masterKey.Key, masterKey.ChainCode...)
 
 	groups, err := slip39.GenerateMnemonicsWithPassphrase(
 		1,
@@ -409,7 +409,7 @@ func jsRecoverFromAEStoString(this js.Value, args []js.Value) any {
 
 	seed := bip39.NewSeed(mnemonic, "")
 	masterKey, _ := bip32.NewMasterKey(seed)
-	masterSecret := masterKey.Key
+	masterSecret := append(masterKey.Key, masterKey.ChainCode...)
 
 	groups, err := slip39.GenerateMnemonicsWithPassphrase(
 		1,

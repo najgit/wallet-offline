@@ -415,6 +415,10 @@ func jsRecoverFromAEStoString(this js.Value, args []js.Value) any {
 		return map[string]any{"error": err.Error()}
 	}
 
+	if len(masterSecret)%2 != 0 {
+		masterSecret = masterSecret[:len(masterSecret)-1] // trim last byte if odd length
+	}
+
 	groups, err := slip39.GenerateMnemonicsWithPassphrase(
 		1,
 		[]slip39.MemberGroupParameters{{MemberThreshold: 3, MemberCount: 5}},

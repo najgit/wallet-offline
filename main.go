@@ -410,7 +410,10 @@ func jsRecoverFromAEStoString(this js.Value, args []js.Value) any {
 	// seed := bip39.NewSeed(mnemonic, "")
 	// masterKey, _ := bip32.NewMasterKey(seed)
 	// masterSecret := masterKey.Key
-	masterSecret, _ := bip39.MnemonicToByteArray(mnemonic)
+	masterSecret, err := bip39.MnemonicToByteArray(mnemonic)
+	if err != nil {
+		return map[string]any{"error": err.Error()}
+	}
 
 	groups, err := slip39.GenerateMnemonicsWithPassphrase(
 		1,

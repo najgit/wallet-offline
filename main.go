@@ -412,20 +412,25 @@ func jsRecoverFromAEStoString(this js.Value, args []js.Value) any {
 		return map[string]any{"error": "invalid mnemonic"}
 	}
 
+	// seed := bip39.NewSeed(mnemonic, "")
+	// masterKey, _ := bip32.NewMasterKey(seed)
+	// masterSecret := masterKey.Key
+
+	// TODO: TEST this way
+	entropy, err := bip39.MnemonicToByteArray(mnemonic)
+	if err != nil {
+		return map[string]any{"error": err.Error()}
+	}
+
+	mnemonic, _ = bip39.NewMnemonic(entropy)
 	seed := bip39.NewSeed(mnemonic, "")
 	masterKey, _ := bip32.NewMasterKey(seed)
 	masterSecret := masterKey.Key
 
-	// TODO: TEST this way
-	// masterSecret, err := bip39.MnemonicToByteArray(mnemonic)
-	// if err != nil {
-	// 	return map[string]any{"error": err.Error()}
-	// }
-
 	// // Ensure secret length is even and within SLIP-39 valid range
-	// if len(masterSecret)%2 != 0 {
-	// 	masterSecret = masterSecret[:len(masterSecret)-1] // trim last byte if odd length
-	// }
+	if len(masterSecret)%2 != 0 {
+		masterSecret = masterSecret[:len(masterSecret)-1] // trim last byte if odd length
+	}
 
 	groups, err := slip39.GenerateMnemonicsWithPassphrase(
 		1,

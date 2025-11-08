@@ -419,12 +419,18 @@ func jsRecoverFromAEStoString(this js.Value, args []js.Value) any {
 	// TODO: TEST this way
 	entropy, err := bip39.MnemonicToByteArray(mnemonic)
 	if err != nil {
-		return map[string]any{"error": err.Error()}
+		return map[string]any{"error1": err.Error()}
 	}
 
-	mnemonic, _ = bip39.NewMnemonic(entropy)
+	mnemonic, err = bip39.NewMnemonic(entropy)
+	if err != nil {
+		return map[string]any{"error2": err.Error()}
+	}
 	seed := bip39.NewSeed(mnemonic, "")
-	masterKey, _ := bip32.NewMasterKey(seed)
+	masterKey, err := bip32.NewMasterKey(seed)
+	if err != nil {
+		return map[string]any{"error3": err.Error()}
+	}
 	masterSecret := masterKey.Key
 
 	// // Ensure secret length is even and within SLIP-39 valid range

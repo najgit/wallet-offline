@@ -254,10 +254,10 @@ function setupEventListeners() {
                 const obj = typeof result === 'string' ? JSON.parse(result) : result;
 
                 if (obj.error) {
-                    outputEl.textContent = `Error: ${obj.error}`;
+                    mnemonicRecover.textContent = `Error: ${obj.error}`;
                     return;
                 }
-
+                console.log('recover result:', obj);
                 if (obj.decrypted) {
                     // mnemonicRecover.textContent = "recovered mnemonic: "+ obj.decrypted;
                     // keyRecover.textContent = "recovered private: "+ obj.masterKeyHex;
@@ -287,7 +287,7 @@ function setupEventListeners() {
 
             
             } catch (e) {
-                document.getElementById('mnemonicRecover').textContent = String(result);
+                mnemonicRecover.textContent = String(result);
             }
         }
     });

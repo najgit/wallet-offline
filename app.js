@@ -257,7 +257,7 @@ function setupEventListeners() {
                     mnemonicRecover.textContent = `Error: ${obj.error}`;
                     return;
                 }
-                console.log('recover result:', obj);
+                // console.log('recover result:', obj);
                 if (obj.decrypted) {
                     // mnemonicRecover.textContent = "recovered mnemonic: "+ obj.decrypted;
                     // keyRecover.textContent = "recovered private: "+ obj.masterKeyHex;

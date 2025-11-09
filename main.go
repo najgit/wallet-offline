@@ -111,7 +111,7 @@ func jsGenerateShares(this js.Value, args []js.Value) any {
 	// Generate BIP39 seed -> BIP32 master key
 	entropy, _ := bip39.NewEntropy(256)
 	mnemonic, _ := bip39.NewMnemonic(entropy)
-	seed := bip39.NewSeed(mnemonic, "")
+	seed := bip39.NewSeed(mnemonic, passphrase)
 	masterKey, _ := bip32.NewMasterKey(seed)
 	masterSecret := masterKey.Key
 
@@ -399,8 +399,8 @@ func jsRecoverFromAEStoString(this js.Value, args []js.Value) any {
 	var err error
 
 	// decrypt 24 passphrase first
-	if passphrase != "" {
-		mnemonic_bytes, err := decrypt(pass, strings.TrimSpace(mnemonic_words))
+	if passphrase != "" && !strings.Contains(mnemonic, " ") {
+		mnemonic_bytes, err := decrypt(pass, mnemonic)
 		if err != nil {
 			return map[string]any{"error": err.Error()}
 		}
@@ -417,20 +417,21 @@ func jsRecoverFromAEStoString(this js.Value, args []js.Value) any {
 	// masterSecret := masterKey.Key
 
 	// TODO: TEST this way
-	entropy, err := bip39.MnemonicToByteArray(mnemonic)
-	if err != nil {
-		return map[string]any{"error": fmt.Sprintf("1: %v", err.Error())}
-	}
-	// // Ensure secret length is even and within SLIP-39 valid range
-	if len(entropy)%2 != 0 {
-		entropy = entropy[:len(entropy)-1] // trim last byte if odd length
-	}
+	// entropy, err := bip39.MnemonicToByteArray(mnemonic)
+	// if err != nil {
+	// 	return map[string]any{"error": fmt.Sprintf("1: %v", err.Error())}
+	// }
+	// // // Ensure secret length is even and within SLIP-39 valid range
+	// if len(entropy)%2 != 0 {
+	// 	entropy = entropy[:len(entropy)-1] // trim last byte if odd length
+	// }
 
-	mnemonic, err = bip39.NewMnemonic(entropy)
-	if err != nil {
-		return map[string]any{"error": fmt.Sprintf("2: %v", err.Error())}
-	}
-	seed := bip39.NewSeed(mnemonic, "")
+	// mnemonic, err = bip39.NewMnemonic(entropy)
+	// if err != nil {
+	// 	return map[string]any{"error": fmt.Sprintf("2: %v", err.Error())}
+	// }
+
+	seed := bip39.NewSeed(mnemonic, passphrase)
 	masterKey, err := bip32.NewMasterKey(seed)
 	if err != nil {
 		return map[string]any{"error": fmt.Sprintf("3: %v", err.Error())}
